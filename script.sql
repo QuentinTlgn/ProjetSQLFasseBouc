@@ -2,6 +2,7 @@
 -- Création des tables
 -- --------------------------
 
+-- Création de la table Utilisateur
 CREATE TABLE Utilisateur(
    loginUtilisateur VARCHAR(50),
    nom VARCHAR(50),
@@ -10,6 +11,7 @@ CREATE TABLE Utilisateur(
    PRIMARY KEY(loginUtilisateur)
 );
 
+-- Création de la table Message
 CREATE TABLE Message(
    idMessage INT,
    message TEXT,
@@ -21,6 +23,7 @@ CREATE TABLE Message(
    FOREIGN KEY(loginUtilisateurR) REFERENCES Utilisateur(loginUtilisateur)
 );
 
+-- Création de la table ReponseMessage
 CREATE TABLE ReponseMessage(
    idReponse INT,
    message TEXT,
@@ -32,6 +35,7 @@ CREATE TABLE ReponseMessage(
    FOREIGN KEY(loginUtilisateur) REFERENCES Utilisateur(loginUtilisateur)
 );
 
+-- Création de la table Sympathiser
 CREATE TABLE Sympathiser(
    loginUtilisateur1 VARCHAR(50),
    loginUtilisateur2 VARCHAR(50),
@@ -40,67 +44,53 @@ CREATE TABLE Sympathiser(
    FOREIGN KEY(loginUtilisateur2) REFERENCES Utilisateur(loginUtilisateur)
 );
 
+
 -- --------------------------
 -- Création des procédures stockées
 -- --------------------------
 
+-- Création des procédures stockées
 CREATE OR REPLACE PACKAGE PackFasseBouc AS
 
-    -- Procédure pour ajouter un utilisateur
-    PROCEDURE ajouterUtilisateur(p_loginUtilisateur VARCHAR(255));
+    PROCEDURE ajouterUtilisateur(p_loginUtilisateur VARCHAR(50), p_nom VARCHAR(50), p_prenom VARCHAR(50), p_anniversaire DATETIME);
+    
+    PROCEDURE supprimerUtilisateur(p_loginUtilisateur VARCHAR(50));
 
-    -- Procédure pour supprimer l'utilisateur courant
-    PROCEDURE supprimerUtilisateur;
+    PROCEDURE connexion(p_loginUtilisateur VARCHAR(50));
 
-    -- Procédure pour connecter un utilisateur
-    PROCEDURE connexion(p_loginUtilisateur VARCHAR(255));
-
-    -- Procédure pour déconnecter l'utilisateur courant
     PROCEDURE deconnexion;
 
-    -- Procédure pour ajouter un ami
-    PROCEDURE ajouterAmi(p_loginAmi VARCHAR(255));
+    PROCEDURE ajouterAmi(p_loginUtilisateur VARCHAR(50), p_loginAmi VARCHAR(50));
 
-    -- Procédure pour supprimer un ami
-    PROCEDURE supprimerAmi(p_loginAmi VARCHAR(255));
+    PROCEDURE supprimerAmi(p_loginUtilisateur VARCHAR(50), p_loginAmi VARCHAR(50));
 
-    -- Procédure pour afficher le mur d'un utilisateur
-    PROCEDURE afficherMur(p_loginUtilisateur VARCHAR(255));
+    PROCEDURE afficherMur(p_loginUtilisateur VARCHAR(50));
 
-    -- Procédure pour ajouter un message sur le mur
-    PROCEDURE ajouterMessageMur(p_loginAmi VARCHAR(255), p_message TEXT);
+    PROCEDURE ajouterMessageMur(p_loginUtilisateurE VARCHAR(50), p_loginUtilisateurR VARCHAR(50), p_message TEXT);
 
-    -- Procédure pour supprimer un message du mur
     PROCEDURE supprimerMessageMur(p_idMessage INT);
 
-    -- Procédure pour répondre à un message sur le mur
-    PROCEDURE repondreMessageMur(p_idMessage INT, p_messageReponse TEXT);
+    PROCEDURE repondreMessageMur(p_idMessage INT, p_loginUtilisateur VARCHAR(50), p_messageReponse TEXT);
 
-    -- Procédure pour afficher la liste d'amis d'un utilisateur
-    PROCEDURE afficherAmi(p_loginUtilisateur VARCHAR(255));
+    PROCEDURE afficherAmi(p_loginUtilisateur VARCHAR(50));
 
-    -- Procédure pour compter le nombre d'amis d'un utilisateur
-    PROCEDURE compterAmi(p_loginUtilisateur VARCHAR(255));
+    PROCEDURE compterAmi(p_loginUtilisateur VARCHAR(50));
 
-    -- Procédure pour chercher un membre du FasseBouc par préfixe de login
-    PROCEDURE chercherMembre(p_prefixeLoginMembre VARCHAR(255));
+    PROCEDURE chercherMembre(p_prefixeLoginMembre VARCHAR(50));
 
 END PackFasseBouc;
 
--- --------------------------
 -- Corps des procédures stockées
--- --------------------------
-
 CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
 
-    PROCEDURE ajouterUtilisateur(p_loginUtilisateur VARCHAR(255)) IS
+    PROCEDURE ajouterUtilisateur(p_loginUtilisateur VARCHAR(50), p_nom VARCHAR(50), p_prenom VARCHAR(50), p_anniversaire DATETIME) IS
     BEGIN
         -- Code pour ajouter un utilisateur
     END ajouterUtilisateur;
 
-    PROCEDURE supprimerUtilisateur IS
+    PROCEDURE supprimerUtilisateur(p_loginUtilisateur VARCHAR(50)) IS
     BEGIN
-        -- Code pour supprimer l'utilisateur courant
+        -- Code pour supprimer un utilisateur
     END supprimerUtilisateur;
 
     -- Les autres procédures auront des structures similaires
