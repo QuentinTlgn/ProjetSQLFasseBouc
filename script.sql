@@ -32,7 +32,7 @@ CREATE TABLE ReponseMessage(
    FOREIGN KEY(loginUtilisateur) REFERENCES Utilisateur(loginUtilisateur)
 );
 
-CREATE TABLE sympathiser(
+CREATE TABLE Sympathiser(
    loginUtilisateur1 VARCHAR(50),
    loginUtilisateur2 VARCHAR(50),
    PRIMARY KEY(loginUtilisateur1, loginUtilisateur2),
