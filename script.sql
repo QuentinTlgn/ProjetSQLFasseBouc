@@ -7,15 +7,15 @@ CREATE TABLE Utilisateur(
    loginUtilisateur VARCHAR(50),
    nom VARCHAR(50),
    prenom VARCHAR(50),
-   anniversaire DATETIME,
+   anniversaire DATE,
    PRIMARY KEY(loginUtilisateur)
 );
 
 -- Création de la table Message
 CREATE TABLE Message(
    idMessage INT,
-   message TEXT,
-   datePublication DATETIME,
+   message VARCHAR(200),
+   datePublication DATE,
    loginUtilisateurE VARCHAR(50),
    loginUtilisateurR VARCHAR(50),
    PRIMARY KEY(idMessage),
@@ -26,8 +26,8 @@ CREATE TABLE Message(
 -- Création de la table ReponseMessage
 CREATE TABLE ReponseMessage(
    idReponse INT,
-   message TEXT,
-   datePublication DATETIME,
+   message VARCHAR(200),
+   datePublication DATE,
    idMessageParent INT NOT NULL,
    loginUtilisateur VARCHAR(50) NOT NULL,
    PRIMARY KEY(idReponse),
@@ -97,4 +97,3 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
     -- ...
 
 END PackFasseBouc;
-
