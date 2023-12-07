@@ -2,39 +2,42 @@
 -- Création des tables
 -- --------------------------
 
--- Table pour stocker les utilisateurs
-CREATE TABLE Utilisateur (
-    loginUtilisateur VARCHAR(255) PRIMARY KEY
+CREATE TABLE Utilisateur(
+   loginUtilisateur VARCHAR(50),
+   nom VARCHAR(50),
+   prenom VARCHAR(50),
+   anniversaire DATETIME,
+   PRIMARY KEY(loginUtilisateur)
 );
 
--- Table pour stocker les liens d'amitié entre utilisateurs
-CREATE TABLE Ami (
-    idAmi SERIAL PRIMARY KEY,
-    loginUtilisateur1 VARCHAR(255),
-    loginUtilisateur2 VARCHAR(255),
-    FOREIGN KEY (loginUtilisateur1) REFERENCES Utilisateur(loginUtilisateur),
-    FOREIGN KEY (loginUtilisateur2) REFERENCES Utilisateur(loginUtilisateur),
-    CHECK (loginUtilisateur1 < loginUtilisateur2)
+CREATE TABLE Message(
+   idMessage INT,
+   message TEXT,
+   datePublication DATETIME,
+   loginUtilisateurE VARCHAR(50),
+   loginUtilisateurR VARCHAR(50),
+   PRIMARY KEY(idMessage),
+   FOREIGN KEY(loginUtilisateurE) REFERENCES Utilisateur(loginUtilisateur),
+   FOREIGN KEY(loginUtilisateurR) REFERENCES Utilisateur(loginUtilisateur)
 );
 
--- Table pour stocker les messages sur les murs
-CREATE TABLE Mur (
-    idMessage SERIAL PRIMARY KEY,
-    loginUtilisateur VARCHAR(255),
-    message TEXT,
-    datePublication TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (loginUtilisateur) REFERENCES Utilisateur(loginUtilisateur)
+CREATE TABLE ReponseMessage(
+   idReponse INT,
+   message TEXT,
+   datePublication DATETIME,
+   idMessageParent INT NOT NULL,
+   loginUtilisateur VARCHAR(50) NOT NULL,
+   PRIMARY KEY(idReponse),
+   FOREIGN KEY(idMessageParent) REFERENCES Message(idMessage),
+   FOREIGN KEY(loginUtilisateur) REFERENCES Utilisateur(loginUtilisateur)
 );
 
--- Table pour stocker les réponses aux messages sur les murs
-CREATE TABLE ReponseMur (
-    idReponse SERIAL PRIMARY KEY,
-    idMessageParent SERIAL,
-    loginUtilisateur VARCHAR(255),
-    message TEXT,
-    datePublication TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (idMessageParent) REFERENCES Mur(idMessage),
-    FOREIGN KEY (loginUtilisateur) REFERENCES Utilisateur(loginUtilisateur)
+CREATE TABLE sympathiser(
+   loginUtilisateur1 VARCHAR(50),
+   loginUtilisateur2 VARCHAR(50),
+   PRIMARY KEY(loginUtilisateur1, loginUtilisateur2),
+   FOREIGN KEY(loginUtilisateur1) REFERENCES Utilisateur(loginUtilisateur),
+   FOREIGN KEY(loginUtilisateur2) REFERENCES Utilisateur(loginUtilisateur)
 );
 
 -- --------------------------
