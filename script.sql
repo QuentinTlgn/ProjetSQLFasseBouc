@@ -69,11 +69,11 @@ CREATE OR REPLACE PACKAGE PackFasseBouc AS
 
     PROCEDURE afficherMur(p_loginUtilisateur VARCHAR(50));
 
-    PROCEDURE ajouterMessageMur(p_loginUtilisateurE VARCHAR(50), p_loginUtilisateurR VARCHAR(50), p_message TEXT);
+    PROCEDURE ajouterMessageMur(p_loginUtilisateurE VARCHAR(50), p_loginUtilisateurR VARCHAR(50), p_message VARCHAR(50));
 
     PROCEDURE supprimerMessageMur(p_idMessage INT);
 
-    PROCEDURE repondreMessageMur(p_idMessage INT, p_loginUtilisateur VARCHAR(50), p_messageReponse TEXT);
+    PROCEDURE repondreMessageMur(p_idMessage INT, p_loginUtilisateur VARCHAR(50), p_messageReponse VARCHAR(50));
 
     PROCEDURE afficherAmi(p_loginUtilisateur VARCHAR(50));
 
