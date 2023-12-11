@@ -1,6 +1,10 @@
 -- --------------------------
 -- Création des tables
 -- --------------------------
+--DROP TABLE sympathiser;
+--DROP TABLE message;
+--DROP TABLE reponsemessage;
+--DROP TABLE utilisateur;
 
 -- Création de la table Utilisateur
 CREATE TABLE Utilisateur(
@@ -29,7 +33,7 @@ CREATE TABLE ReponseMessage(
    loginUtilisateurE VARCHAR(50) NOT NULL,
    message VARCHAR(200),
    datePublication DATE,
-   PRIMARY KEY(idMessageParent, loginUtilisateur),
+   PRIMARY KEY(idMessageParent, loginUtilisateurE),
    FOREIGN KEY(idMessageParent) REFERENCES Message(idMessage),
    FOREIGN KEY(loginUtilisateurE) REFERENCES Utilisateur(loginUtilisateur)
 );
@@ -148,4 +152,3 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
     END chercherMembre;
 
 END PackFasseBouc;
-
