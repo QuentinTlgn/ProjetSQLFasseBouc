@@ -51,7 +51,7 @@ CREATE TABLE Sympathiser(
 -- Création des procédures stockées
 CREATE OR REPLACE PACKAGE PackFasseBouc AS
 
-    PROCEDURE ajouterUtilisateur(p_loginUtilisateur VARCHAR(50), p_nom VARCHAR(50), p_prenom VARCHAR(50), p_anniversaire DATETIME);
+    PROCEDURE ajouterUtilisateur(p_loginUtilisateur VARCHAR(50), p_nom VARCHAR(50), p_prenom VARCHAR(50), p_anniversaire DATE);
     
     PROCEDURE supprimerUtilisateur(p_loginUtilisateur VARCHAR(50));
 
@@ -82,7 +82,7 @@ END PackFasseBouc;
 -- Corps des procédures stockées
 CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
 
-    PROCEDURE ajouterUtilisateur(p_loginUtilisateur VARCHAR(50), p_nom VARCHAR(50), p_prenom VARCHAR(50), p_anniversaire DATETIME) IS
+    PROCEDURE ajouterUtilisateur(p_loginUtilisateur VARCHAR(50), p_nom VARCHAR(50), p_prenom VARCHAR(50), p_anniversaire DATE) IS
     BEGIN
         -- Code pour ajouter un utilisateur
     END ajouterUtilisateur;
@@ -117,7 +117,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         -- Code pour afficher le mur d'un utilisateur
     END afficherMur;
 
-    PROCEDURE ajouterMessageMur(p_loginUtilisateurE VARCHAR(50), p_loginUtilisateurR VARCHAR(50), p_message TEXT) IS
+    PROCEDURE ajouterMessageMur(p_loginUtilisateurE VARCHAR(50), p_loginUtilisateurR VARCHAR(50), p_message VARCHAR(200)) IS
     BEGIN
         -- Code pour ajouter un message sur le mur
     END ajouterMessageMur;
@@ -127,7 +127,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         -- Code pour supprimer un message du mur
     END supprimerMessageMur;
 
-    PROCEDURE repondreMessageMur(p_idMessage INT, p_loginUtilisateur VARCHAR(50), p_messageReponse TEXT) IS
+    PROCEDURE repondreMessageMur(p_idMessage INT, p_loginUtilisateur VARCHAR(50), p_messageReponse VARCHAR(200)) IS
     BEGIN
         -- Code pour répondre à un message sur le mur
     END repondreMessageMur;
