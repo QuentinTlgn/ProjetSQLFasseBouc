@@ -92,7 +92,60 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         -- Code pour supprimer un utilisateur
     END supprimerUtilisateur;
 
-    -- Les autres procédures auront des structures similaires
-    -- ...
+    PROCEDURE connexion(p_loginUtilisateur VARCHAR(50)) IS
+    BEGIN
+        -- Code pour connecter un utilisateur
+    END connexion;
+
+    PROCEDURE deconnexion IS
+    BEGIN
+        -- Code pour déconnecter l'utilisateur courant
+    END deconnexion;
+
+    PROCEDURE ajouterAmi(p_loginUtilisateur VARCHAR(50), p_loginAmi VARCHAR(50)) IS
+    BEGIN
+        -- Code pour ajouter un ami
+    END ajouterAmi;
+
+    PROCEDURE supprimerAmi(p_loginUtilisateur VARCHAR(50), p_loginAmi VARCHAR(50)) IS
+    BEGIN
+        -- Code pour supprimer un ami
+    END supprimerAmi;
+
+    PROCEDURE afficherMur(p_loginUtilisateur VARCHAR(50)) IS
+    BEGIN
+        -- Code pour afficher le mur d'un utilisateur
+    END afficherMur;
+
+    PROCEDURE ajouterMessageMur(p_loginUtilisateurE VARCHAR(50), p_loginUtilisateurR VARCHAR(50), p_message TEXT) IS
+    BEGIN
+        -- Code pour ajouter un message sur le mur
+    END ajouterMessageMur;
+
+    PROCEDURE supprimerMessageMur(p_idMessage INT) IS
+    BEGIN
+        -- Code pour supprimer un message du mur
+    END supprimerMessageMur;
+
+    PROCEDURE repondreMessageMur(p_idMessage INT, p_loginUtilisateur VARCHAR(50), p_messageReponse TEXT) IS
+    BEGIN
+        -- Code pour répondre à un message sur le mur
+    END repondreMessageMur;
+
+    PROCEDURE afficherAmi(p_loginUtilisateur VARCHAR(50)) IS
+    BEGIN
+        -- Code pour afficher la liste d'amis d'un utilisateur
+    END afficherAmi;
+
+    PROCEDURE compterAmi(p_loginUtilisateur VARCHAR(50)) IS
+    BEGIN
+        -- Code pour compter le nombre d'amis d'un utilisateur
+    END compterAmi;
+
+    PROCEDURE chercherMembre(p_prefixeLoginMembre VARCHAR(50)) IS
+    BEGIN
+        -- Code pour chercher un membre du FasseBouc par préfixe de login
+    END chercherMembre;
 
 END PackFasseBouc;
+
