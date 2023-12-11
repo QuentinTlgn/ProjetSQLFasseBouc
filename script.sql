@@ -51,91 +51,106 @@ CREATE TABLE Sympathiser(
 -- --------------------------
 -- Création des procédures stockées
 -- --------------------------
--- Corps des procédures stockées
-CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
 
-    PROCEDURE ajouterUtilisateur(p_loginUtilisateur VARCHAR(50), p_nom VARCHAR(50), p_prenom VARCHAR(50), p_anniversaire DATE) IS
+-- Création des procédures stockées
+CREATE OR REPLACE PACKAGE PackFasseBouc AS
+
+    PROCEDURE ajouterUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_nom IN utilisateur.nom%TYPE, p_prenom IN utilisateur.nom%TYPE, p_anniversaire IN utilisateur.anniversaire%TYPE);
+    
+    PROCEDURE supprimerUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE); 
+
+    PROCEDURE connexion(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE);
+
+    PROCEDURE deconnexion;
+
+    PROCEDURE ajouterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_loginAmi IN utilisateur.loginUtilisateur%TYPE);
+
+    PROCEDURE supprimerAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE , p_loginAmi IN utilisateur.loginUtilisateur%TYPE);
+
+    PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE);
+
+    PROCEDURE ajouterMessageMur(p_loginUtilisateurE IN utilisateur.loginUtilisateur%TYPE, p_loginUtilisateurR IN utilisateur.loginUtilisateur%TYPE, p_message IN message.message%TYPE);
+
+    PROCEDURE supprimerMessageMur(p_idMessage IN message.idMessage%TYPE);
+
+    PROCEDURE repondreMessageMur(p_idMessage IN message.idMessage%TYPE, p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE , p_messageReponse IN message.message%TYPE);
+
+    PROCEDURE afficherAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE );
+
+    PROCEDURE compterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE );
+
+    PROCEDURE chercherMembre(p_prefixeLoginMembre IN VARCHAR);
+
+END PackFasseBouc;
+
+-- Corps des procédures stockées
+CREATE OR REPLACE PACKAGE BODY PackFasseBouc IS
+
+    PROCEDURE ajouterUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_nom IN utilisateur.nom%TYPE, p_prenom IN utilisateur.nom%TYPE, p_anniversaire IN utilisateur.anniversaire%TYPE)
+    IS
+    
     BEGIN
         -- Code pour ajouter un utilisateur
-        INSERT INTO Utilisateur(loginUtilisateur, nom, prenom, anniversaire)
-        VALUES (p_loginUtilisateur, p_nom, p_prenom, p_anniversaire);
     END ajouterUtilisateur;
 
-    PROCEDURE supprimerUtilisateur(p_loginUtilisateur VARCHAR(50)) IS
+    PROCEDURE supprimerUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour supprimer un utilisateur
-        DELETE FROM Utilisateur WHERE loginUtilisateur = p_loginUtilisateur;
     END supprimerUtilisateur;
 
-    PROCEDURE connexion(p_loginUtilisateur VARCHAR(50)) IS
+    PROCEDURE connexion(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour connecter un utilisateur
-        -- Vous pouvez définir une variable de session pour suivre l'utilisateur connecté, etc.
     END connexion;
 
     PROCEDURE deconnexion IS
     BEGIN
         -- Code pour déconnecter l'utilisateur courant
-        -- Vous pouvez effacer les variables de session, etc.
     END deconnexion;
 
-    PROCEDURE ajouterAmi(p_loginUtilisateur VARCHAR(50), p_loginAmi VARCHAR(50)) IS
+    PROCEDURE ajouterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour ajouter un ami
-        INSERT INTO Sympathiser(loginUtilisateur1, loginUtilisateur2)
-        VALUES (p_loginUtilisateur, p_loginAmi);
     END ajouterAmi;
 
-    PROCEDURE supprimerAmi(p_loginUtilisateur VARCHAR(50), p_loginAmi VARCHAR(50)) IS
+    PROCEDURE supprimerAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE , p_loginAmi ) IS
     BEGIN
         -- Code pour supprimer un ami
-        DELETE FROM Sympathiser
-        WHERE (loginUtilisateur1 = p_loginUtilisateur AND loginUtilisateur2 = p_loginAmi)
-           OR (loginUtilisateur1 = p_loginAmi AND loginUtilisateur2 = p_loginUtilisateur);
     END supprimerAmi;
 
-    PROCEDURE afficherMur(p_loginUtilisateur VARCHAR(50)) IS
+    PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE ) IS
     BEGIN
         -- Code pour afficher le mur d'un utilisateur
-        -- Vous pouvez sélectionner les messages du mur dans la table Message
     END afficherMur;
 
-    PROCEDURE ajouterMessageMur(p_loginUtilisateurE VARCHAR(50), p_loginUtilisateurR VARCHAR(50), p_message VARCHAR(50)) IS
+    PROCEDURE ajouterMessageMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPEE , p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPER , p_message VARCHAR(200)) IS
     BEGIN
         -- Code pour ajouter un message sur le mur
-        INSERT INTO Message(idMessage, message, datePublication, loginUtilisateurE, loginUtilisateurR)
-        VALUES (1, p_message, CURRENT_DATE, p_loginUtilisateurE, p_loginUtilisateurR);
     END ajouterMessageMur;
 
-    PROCEDURE supprimerMessageMur(p_idMessage INT) IS
+    PROCEDURE supprimerMessageMur(p_idMessage IN message.idMessage%TYPE) IS
     BEGIN
         -- Code pour supprimer un message du mur
-        DELETE FROM Message WHERE idMessage = p_idMessage;
     END supprimerMessageMur;
 
-    PROCEDURE repondreMessageMur(p_idMessage INT, p_loginUtilisateur VARCHAR(50), p_messageReponse VARCHAR(50)) IS
+    PROCEDURE repondreMessageMur(p_idMessage IN message.idMessage%TYPE, p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE , p_messageReponse IN message.message%TYPE) IS
     BEGIN
         -- Code pour répondre à un message sur le mur
-        INSERT INTO ReponseMessage(idReponse, message, datePublication, idMessageParent, loginUtilisateur)
-        VALUES (1, p_messageReponse, CURRENT_DATE, p_idMessage, p_loginUtilisateur);
     END repondreMessageMur;
 
-    PROCEDURE afficherAmi(p_loginUtilisateur VARCHAR(50)) IS
+    PROCEDURE afficherAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour afficher la liste d'amis d'un utilisateur
-        -- Vous pouvez sélectionner les amis dans la table Sympathiser
     END afficherAmi;
 
-    PROCEDURE compterAmi(p_loginUtilisateur VARCHAR(50)) IS
+    PROCEDURE compterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE ) IS
     BEGIN
         -- Code pour compter le nombre d'amis d'un utilisateur
-        -- Vous pouvez utiliser une requête COUNT sur la table Sympathiser
     END compterAmi;
 
-    PROCEDURE chercherMembre(p_prefixeLoginMembre VARCHAR(50)) IS
+    PROCEDURE chercherMembre(p_prefixeLoginMembre IN VARCHAR) IS
     BEGIN
-        -- Code pour chercher un membre par préfixe de login
-        -- Vous pouvez utiliser une requête LIKE sur la table Utilisateur
+        -- Code pour chercher un membre du FasseBouc par préfixe de login
     END chercherMembre;
 
 END PackFasseBouc;
