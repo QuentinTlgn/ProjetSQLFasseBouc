@@ -25,14 +25,13 @@ CREATE TABLE Message(
 
 -- Création de la table ReponseMessage
 CREATE TABLE ReponseMessage(
-   idReponse INT,
+   idMessageParent INT NOT NULL,
+   loginUtilisateurE VARCHAR(50) NOT NULL,
    message VARCHAR(200),
    datePublication DATE,
-   idMessageParent INT NOT NULL,
-   loginUtilisateur VARCHAR(50) NOT NULL,
-   PRIMARY KEY(idReponse),
+   PRIMARY KEY(idMessageParent, loginUtilisateur),
    FOREIGN KEY(idMessageParent) REFERENCES Message(idMessage),
-   FOREIGN KEY(loginUtilisateur) REFERENCES Utilisateur(loginUtilisateur)
+   FOREIGN KEY(loginUtilisateurE) REFERENCES Utilisateur(loginUtilisateur)
 );
 
 -- Création de la table Sympathiser
