@@ -7,6 +7,7 @@
 --DROP TABLE utilisateur;
 
 -- Création de la table Utilisateur
+/*
 CREATE TABLE Utilisateur(
    loginUtilisateur VARCHAR(50),
    nom VARCHAR(50),
@@ -46,7 +47,7 @@ CREATE TABLE Sympathiser(
    FOREIGN KEY(loginUtilisateur1) REFERENCES Utilisateur(loginUtilisateur),
    FOREIGN KEY(loginUtilisateur2) REFERENCES Utilisateur(loginUtilisateur)
 );
-
+*/
 
 -- --------------------------
 -- Création des procédures stockées
@@ -56,7 +57,7 @@ CREATE TABLE Sympathiser(
 CREATE OR REPLACE PACKAGE PackFasseBouc AS
 
     PROCEDURE ajouterUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_nom IN utilisateur.nom%TYPE, p_prenom IN utilisateur.nom%TYPE, p_anniversaire IN utilisateur.anniversaire%TYPE);
-    
+    /*
     PROCEDURE supprimerUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE); 
 
     PROCEDURE connexion(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE);
@@ -80,19 +81,19 @@ CREATE OR REPLACE PACKAGE PackFasseBouc AS
     PROCEDURE compterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE );
 
     PROCEDURE chercherMembre(p_prefixeLoginMembre IN VARCHAR);
-
+    */
 END PackFasseBouc;
-
+/
 -- Corps des procédures stockées
 CREATE OR REPLACE PACKAGE BODY PackFasseBouc IS
 
     PROCEDURE ajouterUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_nom IN utilisateur.nom%TYPE, p_prenom IN utilisateur.nom%TYPE, p_anniversaire IN utilisateur.anniversaire%TYPE)
     IS
-    
     BEGIN
         -- Code pour ajouter un utilisateur
+        INSERT INTO utilisateur VALUES(p_loginUtilisateur,p_nom,p_prenom,p_anniversaire);
     END ajouterUtilisateur;
-
+/*
     PROCEDURE supprimerUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour supprimer un utilisateur
@@ -152,5 +153,16 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc IS
     BEGIN
         -- Code pour chercher un membre du FasseBouc par préfixe de login
     END chercherMembre;
-
+*/
 END PackFasseBouc;
+
+-- --------------------------
+-- Execution des procédures
+-- --------------------------
+
+EXECUTE PackFasseBouc.ajouterUtilisateur('alluel', 'allue', 'luc', '23/04/2000');
+
+/*
+SELECT * FROM USER_OBJECTS WHERE OBJECT_NAME = 'PACKFASSEBOUC' AND OBJECT_TYPE IN ('PACKAGE', 'PACKAGE BODY');
+
+DROP PACKAGE BODY PACKFASSEBOUC;*/
