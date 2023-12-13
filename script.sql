@@ -1,3 +1,4 @@
+SET SERVEROUTPUT ON;
 -- --------------------------
 -- Création des tables
 -- --------------------------
@@ -55,15 +56,24 @@ CREATE TABLE Sympathiser(
 
 -- Création des procédures stockées
 CREATE OR REPLACE PACKAGE PackFasseBouc AS
-
+    
+    utilisateurConnecte utilisateur.loginUtilisateur%TYPE;
+    
     PROCEDURE ajouterUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_nom IN utilisateur.nom%TYPE, p_prenom IN utilisateur.nom%TYPE, p_anniversaire IN utilisateur.anniversaire%TYPE);
 
     PROCEDURE supprimerUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE); 
-    /*
-    PROCEDURE connexion(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE);
+    
+    PROCEDURE ajouterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_loginAmi IN utilisateur.loginUtilisateur%TYPE);
 
+    PROCEDURE supprimerAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE , p_loginAmi IN utilisateur.loginUtilisateur%TYPE);
+    
+    PROCEDURE connexion(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE);
+    
+    PROCEDURE afficherConnecte;
+    
     PROCEDURE deconnexion;
     
+/*
     PROCEDURE afficherAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE );
     
     PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE);
@@ -71,12 +81,7 @@ CREATE OR REPLACE PACKAGE PackFasseBouc AS
     PROCEDURE compterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE );
     
     PROCEDURE chercherMembre(p_prefixeLoginMembre IN VARCHAR);
-
-*/
-    PROCEDURE ajouterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_loginAmi IN utilisateur.loginUtilisateur%TYPE);
-
-    PROCEDURE supprimerAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE , p_loginAmi IN utilisateur.loginUtilisateur%TYPE);
-/*
+    
     PROCEDURE ajouterMessageMur(p_loginUtilisateurE IN utilisateur.loginUtilisateur%TYPE, p_message IN message.message%TYPE);
 
     PROCEDURE supprimerMessageMur(p_idMessage IN message.idMessage%TYPE);
@@ -87,7 +92,7 @@ END PackFasseBouc;
 /
 -- Corps des procédures stockées
 CREATE OR REPLACE PACKAGE BODY PackFasseBouc IS
-
+    
     PROCEDURE ajouterUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_nom IN utilisateur.nom%TYPE, p_prenom IN utilisateur.nom%TYPE, p_anniversaire IN utilisateur.anniversaire%TYPE)
     IS
     BEGIN
@@ -100,18 +105,43 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc IS
         -- Code pour supprimer un utilisateur
         DELETE FROM utilisateur WHERE loginUtilisateur = p_loginUtilisateur;
     END supprimerUtilisateur;
-/*
+    
+    PROCEDURE ajouterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
+    BEGIN
+        -- Code pour ajouter un ami
+        INSERT INTO sympathiser VALUES (p_loginUtilisateur, p_loginAmi);
+    END ajouterAmi;
+
+    PROCEDURE supprimerAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
+    BEGIN
+        -- Code pour supprimer un ami
+        DELETE FROM sympathiser
+        WHERE (loginUtilisateur1 = p_loginUtilisateur AND loginUtilisateur2 = p_loginAmi)
+           OR (loginUtilisateur1 = p_loginAmi AND loginUtilisateur2 = p_loginUtilisateur);
+    END supprimerAmi;
+    
+
     PROCEDURE connexion(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour connecter un utilisateur
-        -- (Ajoutez votre logique de connexion ici)
+        SELECT loginUtilisateur INTO utilisateurConnecte
+        FROM utilisateur
+        WHERE loginUtilisateur = p_loginUtilisateur;
+        
     END connexion;
-
+    
+    PROCEDURE afficherConnecte IS
+    BEGIN
+        dbms_output.put_line(utilisateurConnecte);
+    END afficherConnecte;
+    
     PROCEDURE deconnexion IS
     BEGIN
         -- Code pour déconnecter l'utilisateur courant
-        -- (Ajoutez votre logique de déconnexion ici)
+        utilisateurConnecte := NULL;
     END deconnexion;
+/*
+
     
     PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
@@ -136,21 +166,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc IS
         -- Code pour chercher un membre par préfixe de login
         -- (Ajoutez votre logique de recherche de membre ici)
     END chercherMembre;
-*/
-    PROCEDURE ajouterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
-    BEGIN
-        -- Code pour ajouter un ami
-        INSERT INTO sympathiser VALUES (p_loginUtilisateur, p_loginAmi);
-    END ajouterAmi;
 
-    PROCEDURE supprimerAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
-    BEGIN
-        -- Code pour supprimer un ami
-        DELETE FROM sympathiser
-        WHERE (loginUtilisateur1 = p_loginUtilisateur AND loginUtilisateur2 = p_loginAmi)
-           OR (loginUtilisateur1 = p_loginAmi AND loginUtilisateur2 = p_loginUtilisateur);
-    END supprimerAmi;
-/*
     PROCEDURE ajouterMessageMur(p_loginUtilisateurE IN utilisateur.loginUtilisateur%TYPE, p_loginUtilisateurR IN utilisateur.loginUtilisateur%TYPE, p_message IN message.message%TYPE) IS
     BEGIN
         -- Code pour ajouter un message sur le mur
@@ -176,7 +192,6 @@ END PackFasseBouc;
 -- --------------------------
 
 
-
 EXECUTE PackFasseBouc.ajouterUtilisateur('alluel', 'allue', 'luc', '23/04/2000');
 EXECUTE PackFasseBouc.ajouterUtilisateur('tauleigq', 'tauleigne', 'quentin', '28/03/2002');
 EXECUTE PackFasseBouc.ajouterUtilisateur('toto', 'to', 'to', '28/03/2002');
@@ -190,6 +205,10 @@ EXECUTE PackFasseBouc.ajouterAmi('tauleigq','toto');
 SELECT * FROM sympathiser;
 
 EXECUTE PackFasseBouc.supprimerAmi('toto','tauleigq');
+
+EXECUTE PackFasseBouc.connexion('alluel');
+EXECUTE PackFasseBouc.afficherConnecte;
+EXECUTE PackFasseBouc.deconnexion;
 
 /*SELECT * FROM USER_OBJECTS WHERE OBJECT_NAME = 'PACKFASSEBOUC' AND OBJECT_TYPE IN ('PACKAGE', 'PACKAGE BODY');
 
