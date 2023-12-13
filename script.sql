@@ -63,9 +63,9 @@ CREATE OR REPLACE PACKAGE PackFasseBouc AS
 
     PROCEDURE supprimerUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE); 
     
-    PROCEDURE ajouterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_loginAmi IN utilisateur.loginUtilisateur%TYPE);
+    PROCEDURE ajouterAmi(p_loginAmi IN utilisateur.loginUtilisateur%TYPE);
 
-    PROCEDURE supprimerAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE , p_loginAmi IN utilisateur.loginUtilisateur%TYPE);
+    PROCEDURE supprimerAmi(p_loginAmi IN utilisateur.loginUtilisateur%TYPE);
     
     PROCEDURE connexion(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE);
     
@@ -106,27 +106,41 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc IS
         DELETE FROM utilisateur WHERE loginUtilisateur = p_loginUtilisateur;
     END supprimerUtilisateur;
     
-    PROCEDURE ajouterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
+    PROCEDURE ajouterAmi(p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour ajouter un ami
-        INSERT INTO sympathiser VALUES (p_loginUtilisateur, p_loginAmi);
+        IF utilisateurConnecte IS NOT NULL THEN
+          INSERT INTO sympathiser VALUES (utilisateurConnecte, p_loginAmi);
+        ELSE
+          dbms_output.put_line('Vous devez etre connecte pour effectuer cette action');
+        END IF;
     END ajouterAmi;
 
-    PROCEDURE supprimerAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
+    PROCEDURE supprimerAmi(p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
+        IF utilisateurConnecte IS NOT NULL THEN
+          DELETE FROM sympathiser
+          WHERE (loginUtilisateur1 = utilisateurConnecte AND loginUtilisateur2 = p_loginAmi)
+               OR (loginUtilisateur1 = p_loginAmi AND loginUtilisateur2 = utilisateurConnecte);
+        ELSE
+          dbms_output.put_line('Vous devez etre connecte pour effectuer cette action');
+        END IF;
         -- Code pour supprimer un ami
-        DELETE FROM sympathiser
-        WHERE (loginUtilisateur1 = p_loginUtilisateur AND loginUtilisateur2 = p_loginAmi)
-           OR (loginUtilisateur1 = p_loginAmi AND loginUtilisateur2 = p_loginUtilisateur);
+        
     END supprimerAmi;
     
 
     PROCEDURE connexion(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour connecter un utilisateur
-        SELECT loginUtilisateur INTO utilisateurConnecte
-        FROM utilisateur
-        WHERE loginUtilisateur = p_loginUtilisateur;
+        IF utilisateurConnecte IS NULL THEN
+          SELECT loginUtilisateur INTO utilisateurConnecte
+          FROM utilisateur
+          WHERE loginUtilisateur = p_loginUtilisateur;
+          dbms_output.put_line('Bienvenue '|| utilisateurConnecte);
+        ELSE
+          dbms_output.put_line('Utilisateur ' || utilisateurConnecte || ' deja connecte. Veuillez le deconnecter avant de vous reconnecter');
+        END IF;
         
     END connexion;
     
@@ -138,11 +152,16 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc IS
     PROCEDURE deconnexion IS
     BEGIN
         -- Code pour déconnecter l'utilisateur courant
-        utilisateurConnecte := NULL;
+        IF utilisateurConnecte IS NOT NULL THEN
+          utilisateurConnecte := NULL;
+          dbms_output.put_line('Vous nous quittez deja ? :(');
+        ELSE
+          dbms_output.put_line('Aucun utilisateur connecte');
+        END IF;
+        
     END deconnexion;
 /*
 
-    
     PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour afficher le mur d'un utilisateur
@@ -200,11 +219,10 @@ SELECT * FROM utilisateur;
 
 EXECUTE PackFasseBouc.supprimerUtilisateur('toto');
 
-EXECUTE PackFasseBouc.ajouterAmi('tauleigq','alluel');
-EXECUTE PackFasseBouc.ajouterAmi('tauleigq','toto');
+EXECUTE PackFasseBouc.ajouterAmi('tauleigq');
 SELECT * FROM sympathiser;
 
-EXECUTE PackFasseBouc.supprimerAmi('toto','tauleigq');
+EXECUTE PackFasseBouc.supprimerAmi('tauleigq');
 
 EXECUTE PackFasseBouc.connexion('alluel');
 EXECUTE PackFasseBouc.afficherConnecte;
