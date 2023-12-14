@@ -104,7 +104,7 @@ END PackFasseBouc;
 /
 -- Corps des procédures stockées
 CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
-
+    --Variable qui contient l'utilisateur connecté
     utilisateurConnecte utilisateur.loginUtilisateur%TYPE;
     
     PROCEDURE ajouterUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_nom IN utilisateur.nom%TYPE, p_prenom IN utilisateur.nom%TYPE, p_anniversaire IN utilisateur.anniversaire%TYPE)
