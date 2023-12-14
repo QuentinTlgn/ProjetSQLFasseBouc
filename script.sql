@@ -94,9 +94,9 @@ CREATE OR REPLACE PACKAGE PackFasseBouc AS
     
     PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE);
     
+    PROCEDURE ajouterMessageMur(p_loginUtilisateurR IN utilisateur.loginUtilisateur%TYPE, p_message IN message.message%TYPE);
+    
 /*    
-    PROCEDURE ajouterMessageMur(p_loginUtilisateurE IN utilisateur.loginUtilisateur%TYPE, p_message IN message.message%TYPE);
-
     PROCEDURE supprimerMessageMur(p_idMessage IN message.idMessage%TYPE);
 
     PROCEDURE repondreMessageMur(p_idMessage IN message.idMessage%TYPE, p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE , p_messageReponse IN message.message%TYPE);
@@ -238,14 +238,27 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         END IF;
     END afficherMur;
     
-    /*
-
-    PROCEDURE ajouterMessageMur(p_loginUtilisateurE IN utilisateur.loginUtilisateur%TYPE, p_loginUtilisateurR IN utilisateur.loginUtilisateur%TYPE, p_message IN message.message%TYPE) IS
+    PROCEDURE ajouterMessageMur(p_loginUtilisateurR IN utilisateur.loginUtilisateur%TYPE, p_message IN message.message%TYPE) IS
+    v_amitie_existe NUMBER := 0;
     BEGIN
-        -- Code pour ajouter un message sur le mur
-        INSERT INTO message VALUES (1, p_message, SYSDATE, p_loginUtilisateurE, p_loginUtilisateurR);
+        IF utilisateurConnecte IS NOT NULL THEN
+            -- Vérifier si l'amitié existe déjà
+            SELECT COUNT(*) INTO v_amitie_existe
+            FROM Sympathiser
+            WHERE (loginUtilisateur1, loginUtilisateur2) IN ((utilisateurConnecte, p_loginUtilisateurR), (p_loginUtilisateurR, utilisateurConnecte));
+            
+            IF v_amitie_existe > 0 OR utilisateurConnecte =  p_loginUtilisateurR THEN
+              INSERT INTO message VALUES (1, p_message, SYSDATE, utilisateurConnecte, p_loginUtilisateurR);
+              COMMIT;
+            ELSE
+              dbms_output.put_line('Vous devez être ami avec cette personne pour pouvoir effectuer cette action');
+            END IF;
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
+        END IF;
     END ajouterMessageMur;
-
+    
+    /*
     PROCEDURE supprimerMessageMur(p_idMessage IN NUMBER) IS
     BEGIN
         -- Code pour supprimer un message du mur
@@ -287,7 +300,9 @@ EXECUTE PackFasseBouc.compterAmi;
 
 EXECUTE PackFasseBouc.chercherMembre('all');
 
-EXECUTE PackFasseBouc.afficherMur('alluel');
+EXECUTE PackFasseBouc.afficherMur('tauleigq');
+
+EXECUTE PackFasseBouc.ajouterMessageMur('tauleigq','pikachu');
 
 /*SELECT * FROM USER_OBJECTS WHERE OBJECT_NAME = 'PACKFASSEBOUC' AND OBJECT_TYPE IN ('PACKAGE', 'PACKAGE BODY');
 
