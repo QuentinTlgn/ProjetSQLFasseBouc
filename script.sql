@@ -104,6 +104,7 @@ END PackFasseBouc;
 /
 -- Corps des procédures stockées
 CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
+    
     --Variable qui contient l'utilisateur connecté
     utilisateurConnecte utilisateur.loginUtilisateur%TYPE;
     
@@ -128,17 +129,17 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
     FROM Sympathiser
     WHERE (loginUtilisateur1 = utilisateurConnecte AND loginUtilisateur2 = p_loginAmi)
        OR (loginUtilisateur1 = p_loginAmi AND loginUtilisateur2 = utilisateurConnecte);
-        IF v_amitie_existe > 0 THEN
-         DBMS_OUTPUT.PUT_LINE('Cet ami est déjà ajouté.');
-        ELSE
-        -- Code pour ajouter un ami
-            IF utilisateurConnecte IS NOT NULL THEN
-                INSERT INTO Sympathiser VALUES (utilisateurConnecte, p_loginAmi);
-                 DBMS_OUTPUT.PUT_LINE('Ami ajouté avec succès.');
-            ELSE
-                DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
-            END IF;
-         END IF;
+    IF v_amitie_existe > 0 THEN
+      DBMS_OUTPUT.PUT_LINE('Vous êtes déjà ami avec cet utilisateur');
+    ELSE
+    -- Code pour ajouter un ami
+      IF utilisateurConnecte IS NOT NULL THEN
+        INSERT INTO Sympathiser VALUES (utilisateurConnecte, p_loginAmi);
+        DBMS_OUTPUT.PUT_LINE('Ami ajouté avec succès.');
+      ELSE
+        DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
+      END IF;
+    END IF;
     END ajouterAmi;
 
     PROCEDURE supprimerAmi(p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
@@ -166,7 +167,6 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         ELSE
           dbms_output.put_line('Utilisateur ' || utilisateurConnecte || ' deja connecte. Veuillez le deconnecter avant de vous reconnecter');
         END IF;
-        
     END connexion;
     
     PROCEDURE afficherConnecte IS
