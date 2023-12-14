@@ -57,8 +57,6 @@ CREATE TABLE Sympathiser(
 -- Création des procédures stockées
 CREATE OR REPLACE PACKAGE PackFasseBouc AS
     
-    utilisateurConnecte utilisateur.loginUtilisateur%TYPE;
-    
     PROCEDURE ajouterUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_nom IN utilisateur.nom%TYPE, p_prenom IN utilisateur.nom%TYPE, p_anniversaire IN utilisateur.anniversaire%TYPE);
 
     PROCEDURE supprimerUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE); 
@@ -91,7 +89,9 @@ CREATE OR REPLACE PACKAGE PackFasseBouc AS
 END PackFasseBouc;
 /
 -- Corps des procédures stockées
-CREATE OR REPLACE PACKAGE BODY PackFasseBouc IS
+CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
+
+    utilisateurConnecte utilisateur.loginUtilisateur%TYPE;
     
     PROCEDURE ajouterUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_nom IN utilisateur.nom%TYPE, p_prenom IN utilisateur.nom%TYPE, p_anniversaire IN utilisateur.anniversaire%TYPE)
     IS
@@ -107,13 +107,24 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc IS
     END supprimerUtilisateur;
     
     PROCEDURE ajouterAmi(p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
+    v_amitie_existe NUMBER := 0;
     BEGIN
-        -- Code pour ajouter un ami
-        IF utilisateurConnecte IS NOT NULL THEN
-          INSERT INTO sympathiser VALUES (utilisateurConnecte, p_loginAmi);
+    -- Vérifier si l'amitié existe déjà
+    SELECT COUNT(*) INTO v_amitie_existe
+    FROM Sympathiser
+    WHERE (loginUtilisateur1 = utilisateurConnecte AND loginUtilisateur2 = p_loginAmi)
+       OR (loginUtilisateur1 = p_loginAmi AND loginUtilisateur2 = utilisateurConnecte);
+        IF v_amitie_existe > 0 THEN
+         DBMS_OUTPUT.PUT_LINE('Cet ami est déjà ajouté.');
         ELSE
-          dbms_output.put_line('Vous devez etre connecte pour effectuer cette action');
-        END IF;
+        -- Code pour ajouter un ami
+            IF utilisateurConnecte IS NOT NULL THEN
+                INSERT INTO Sympathiser VALUES (utilisateurConnecte, p_loginAmi);
+                 DBMS_OUTPUT.PUT_LINE('Ami ajouté avec succès.');
+            ELSE
+                DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
+            END IF;
+         END IF;
     END ajouterAmi;
 
     PROCEDURE supprimerAmi(p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
