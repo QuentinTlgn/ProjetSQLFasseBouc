@@ -62,6 +62,11 @@ BEGIN
   SELECT MAX(idMessage)+1 INTO :NEW.idMessage FROM Message;
 END;
 
+CREATE OR REPLACE TRIGGER t_notifCreationMessageMur AFTER INSERT ON Message FOR EACH ROW
+BEGIN 
+  dbms_output.put_line('Nouveau message de '||:NEW.loginUtilisateurE||' sur le mur de '||:NEW.loginUtilisateurR);
+END;
+
 --------------------------------------------------------------------------------
 
 -- --------------------------
@@ -98,9 +103,8 @@ CREATE OR REPLACE PACKAGE PackFasseBouc AS
     
     PROCEDURE supprimerMessageMur(p_idMessage IN message.idMessage%TYPE);
     
-/*    
-    PROCEDURE repondreMessageMur(p_idMessage IN message.idMessage%TYPE, p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE , p_messageReponse IN message.message%TYPE);
-*/
+    PROCEDURE repondreMessageMur(p_idMessage IN message.idMessage%TYPE, p_messageReponse IN ReponseMessage.message%TYPE);
+    
 END PackFasseBouc;
 /
 -- Corps des procédures stockées
@@ -224,6 +228,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         END IF;
     END chercherMembre;
     
+    --ADAPTER POUR AFFICHER LES REPONSES AUX POSTS
     PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour afficher le mur d'un utilisateur
@@ -276,14 +281,31 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
           dbms_output.put_line('Vous devez etre connecte pour effectuer cette action');
         END IF;
     END supprimerMessageMur;
-    
-    /*
-    PROCEDURE repondreMessageMur(p_idMessage IN NUMBER, p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_messageReponse IN VARCHAR2) IS
+
+    PROCEDURE repondreMessageMur(p_idMessage IN message.idMessage%TYPE, p_messageReponse IN ReponseMessage.message%TYPE) IS
+    idMessage message.idMessage%TYPE;
+    idReceveur message.loginUtilisateurR%TYPE;
+    v_amitie_existe NUMBER := 0;
     BEGIN
         -- Code pour répondre à un message sur le mur
-        INSERT INTO ReponseMessage VALUES (p_idMessage, p_loginUtilisateur, p_messageReponse, SYSDATE);
+        IF utilisateurConnecte IS NOT NULL THEN
+          SELECT idMessage,loginUtilisateurR INTO idMessage, idReceveur FROM Message WHERE idMessage = p_idMessage;
+           -- Vérifier si l'amitié existe
+            SELECT COUNT(*) INTO v_amitie_existe
+            FROM Sympathiser
+            WHERE (loginUtilisateur1, loginUtilisateur2) IN ((utilisateurConnecte, idReceveur), (idReceveur, utilisateurConnecte));
+            
+            IF (v_amitie_existe > 0 OR utilisateurConnecte =  idReceveur) AND idMessage IS NOT NULL THEN
+              INSERT INTO ReponseMessage VALUES (p_idMessage, utilisateurConnecte, p_messageReponse, SYSDATE);
+              COMMIT;
+            ELSE
+              dbms_output.put_line('Vous devez être ami avec cette personne pour pouvoir effectuer cette action');
+            END IF;
+        ELSE
+          dbms_output.put_line('Vous devez etre connecte pour effectuer cette action');
+        END IF;
     END repondreMessageMur;
-*/
+
 END PackFasseBouc;
 
 -- --------------------------
@@ -299,7 +321,7 @@ SELECT * FROM utilisateur;
 
 EXECUTE PackFasseBouc.supprimerUtilisateur('toto');
 
-EXECUTE PackFasseBouc.ajouterAmi('toto');
+EXECUTE PackFasseBouc.ajouterAmi('tauleigq');
 SELECT * FROM sympathiser;
 
 EXECUTE PackFasseBouc.supprimerAmi('tauleigq');
@@ -318,6 +340,9 @@ EXECUTE PackFasseBouc.afficherMur('alluel');
 EXECUTE PackFasseBouc.supprimerMessageMur(1003);
 
 EXECUTE PackFasseBouc.ajouterMessageMur('tauleigq','pikachu');
+
+EXECUTE PackFasseBouc.repondreMessageMur(1004, 'ouais');
+SELECT * FROM ReponseMessage;
 
 /*SELECT * FROM USER_OBJECTS WHERE OBJECT_NAME = 'PACKFASSEBOUC' AND OBJECT_TYPE IN ('PACKAGE', 'PACKAGE BODY');
 
