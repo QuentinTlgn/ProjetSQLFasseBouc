@@ -86,9 +86,11 @@ CREATE OR REPLACE PACKAGE PackFasseBouc AS
     PROCEDURE deconnexion;
     
     PROCEDURE compterAmi;
+
+    PROCEDURE afficherAmi;
     
 /*
-    PROCEDURE afficherAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE );
+    
     
     PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE);
     
@@ -196,14 +198,21 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         END IF;
     END compterAmi;
 
-    /*
-    PROCEDURE afficherAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
-    BEGIN
-        -- Code pour afficher la liste d'amis d'un utilisateur
-        -- (Ajoutez votre logique d'affichage des amis ici)
-    END afficherAmi;
-    
+    PROCEDURE afficherAmi IS
+      BEGIN
+      -- Code pour afficher la liste d'amis d'un utilisateur
+      IF utilisateurConnecte IS NOT NULL THEN
+           FOR ami_rec IN (SELECT DISTINCT CASE WHEN loginUtilisateur1 = utilisateurConnecte THEN loginUtilisateur2
+                            ELSE loginUtilisateur1  END AS ami FROM sympathiser WHERE utilisateurConnecte IN (loginUtilisateur1, loginUtilisateur2)) 
+                            LOOP
+                            DBMS_OUTPUT.PUT_LINE('Ami : ' || ami_rec.ami);
+                            END LOOP;
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour afficher la liste d''amis.');
+        END IF;
+      END afficherAmi;
 
+    /*
     PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour afficher le mur d'un utilisateur
@@ -255,6 +264,7 @@ SELECT * FROM sympathiser;
 EXECUTE PackFasseBouc.supprimerAmi('tauleigq');
 
 EXECUTE PackFasseBouc.connexion('alluel');
+EXECUTE PackFasseBouc.afficherAmi;
 EXECUTE PackFasseBouc.afficherConnecte;
 EXECUTE PackFasseBouc.deconnexion;
 
