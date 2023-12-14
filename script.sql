@@ -68,6 +68,7 @@ END;
 -- Création des procédures stockées
 -- --------------------------
 
+
 -- Création des procédures stockées
 CREATE OR REPLACE PACKAGE PackFasseBouc AS
     
@@ -89,9 +90,9 @@ CREATE OR REPLACE PACKAGE PackFasseBouc AS
 
     PROCEDURE afficherAmi;
     
+    PROCEDURE chercherMembre(p_prefixeLoginMembre IN utilisateur.loginUtilisateur%TYPE);
+    
 /*
-    
-    
     PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE);
     
     PROCEDURE chercherMembre(p_prefixeLoginMembre IN VARCHAR);
@@ -201,7 +202,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
     PROCEDURE afficherAmi IS
       BEGIN
       -- Code pour afficher la liste d'amis d'un utilisateur
-      IF utilisateurConnecte IS NOT NULL THEN
+        IF utilisateurConnecte IS NOT NULL THEN
            FOR ami_rec IN (SELECT DISTINCT CASE WHEN loginUtilisateur1 = utilisateurConnecte THEN loginUtilisateur2
                             ELSE loginUtilisateur1  END AS ami FROM sympathiser WHERE utilisateurConnecte IN (loginUtilisateur1, loginUtilisateur2)) 
                             LOOP
@@ -211,7 +212,20 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
             DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour afficher la liste d''amis.');
         END IF;
       END afficherAmi;
-
+      
+    PROCEDURE chercherMembre(p_prefixeLoginMembre IN utilisateur.loginUtilisateur%TYPE) IS
+    BEGIN
+        -- Code pour chercher un membre par préfixe de login
+        IF utilisateurConnecte IS NOT NULL THEN
+          FOR v_Utilisateur IN (SELECT DISTINCT loginutilisateur FROM Utilisateur WHERE loginUtilisateur LIKE ('%'||p_prefixeLoginMembre||'%')) 
+          LOOP
+            DBMS_OUTPUT.PUT_LINE('Utilisateur : '||v_Utilisateur.loginutilisateur);
+          END LOOP;
+        ELSE
+          dbms_output.put_line('Vous devez etre connecte pour effectuer cette action');
+        END IF;
+    END chercherMembre;
+    
     /*
     PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
@@ -219,11 +233,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         -- (Ajoutez votre logique d'affichage du mur ici)
     END afficherMur;
     
-    PROCEDURE chercherMembre(p_prefixeLoginMembre IN VARCHAR2) IS
-    BEGIN
-        -- Code pour chercher un membre par préfixe de login
-        -- (Ajoutez votre logique de recherche de membre ici)
-    END chercherMembre;
+    
 
     PROCEDURE ajouterMessageMur(p_loginUtilisateurE IN utilisateur.loginUtilisateur%TYPE, p_loginUtilisateurR IN utilisateur.loginUtilisateur%TYPE, p_message IN message.message%TYPE) IS
     BEGIN
@@ -258,7 +268,7 @@ SELECT * FROM utilisateur;
 
 EXECUTE PackFasseBouc.supprimerUtilisateur('toto');
 
-EXECUTE PackFasseBouc.ajouterAmi('tauleigq');
+EXECUTE PackFasseBouc.ajouterAmi('toto');
 SELECT * FROM sympathiser;
 
 EXECUTE PackFasseBouc.supprimerAmi('tauleigq');
@@ -269,6 +279,8 @@ EXECUTE PackFasseBouc.afficherConnecte;
 EXECUTE PackFasseBouc.deconnexion;
 
 EXECUTE PackFasseBouc.compterAmi;
+
+EXECUTE PackFasseBouc.chercherMembre('all');
 
 /*SELECT * FROM USER_OBJECTS WHERE OBJECT_NAME = 'PACKFASSEBOUC' AND OBJECT_TYPE IN ('PACKAGE', 'PACKAGE BODY');
 
