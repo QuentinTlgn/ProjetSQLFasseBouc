@@ -78,19 +78,19 @@ CREATE OR REPLACE PACKAGE PackFasseBouc AS
     PROCEDURE ajouterAmi(p_loginAmi IN utilisateur.loginUtilisateur%TYPE);
 
     PROCEDURE supprimerAmi(p_loginAmi IN utilisateur.loginUtilisateur%TYPE);
-    
+
     PROCEDURE connexion(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE);
     
     PROCEDURE afficherConnecte;
-    
+
     PROCEDURE deconnexion;
+    
+    PROCEDURE compterAmi;
     
 /*
     PROCEDURE afficherAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE );
     
     PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE);
-    
-    PROCEDURE compterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE );
     
     PROCEDURE chercherMembre(p_prefixeLoginMembre IN VARCHAR);
     
@@ -149,13 +149,11 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         IF utilisateurConnecte IS NOT NULL THEN
           -- Code pour supprimer un ami
           DELETE FROM sympathiser
-          WHERE (loginUtilisateur1 = utilisateurConnecte AND loginUtilisateur2 = p_loginAmi)
-               OR (loginUtilisateur1 = p_loginAmi AND loginUtilisateur2 = utilisateurConnecte);
+          WHERE (loginUtilisateur1, loginUtilisateur2) IN ((utilisateurConnecte, p_loginAmi), (p_loginAmi, utilisateurConnecte));
         ELSE
           dbms_output.put_line('Vous devez etre connecte pour effectuer cette action');
         END IF;
     END supprimerAmi;
-    
 
     PROCEDURE connexion(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
@@ -184,15 +182,20 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         ELSE
           dbms_output.put_line('Aucun utilisateur connecte');
         END IF;
-        
     END deconnexion;
-    
-    PROCEDURE compterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
+
+    PROCEDURE compterAmi IS
+      numAmi INT;
     BEGIN
         -- Code pour compter le nombre d'amis d'un utilisateur
-        -- (Ajoutez votre logique de comptage des amis ici)
+        IF utilisateurConnecte IS NOT NULL THEN
+          SELECT COUNT(*) INTO numAmi FROM Sympathiser WHERE loginUtilisateur1 = utilisateurConnecte OR loginUtilisateur2 = utilisateurConnecte;
+          dbms_output.put_line('Vous avez '||numAmi||' ami(s)');
+        ELSE
+          dbms_output.put_line('Vous devez etre connecte pour effectuer cette action');
+        END IF;
     END compterAmi;
-    
+
     /*
     PROCEDURE afficherAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
@@ -254,6 +257,8 @@ EXECUTE PackFasseBouc.supprimerAmi('tauleigq');
 EXECUTE PackFasseBouc.connexion('alluel');
 EXECUTE PackFasseBouc.afficherConnecte;
 EXECUTE PackFasseBouc.deconnexion;
+
+EXECUTE PackFasseBouc.compterAmi;
 
 /*SELECT * FROM USER_OBJECTS WHERE OBJECT_NAME = 'PACKFASSEBOUC' AND OBJECT_TYPE IN ('PACKAGE', 'PACKAGE BODY');
 
