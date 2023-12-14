@@ -96,9 +96,9 @@ CREATE OR REPLACE PACKAGE PackFasseBouc AS
     
     PROCEDURE ajouterMessageMur(p_loginUtilisateurR IN utilisateur.loginUtilisateur%TYPE, p_message IN message.message%TYPE);
     
-/*    
     PROCEDURE supprimerMessageMur(p_idMessage IN message.idMessage%TYPE);
-
+    
+/*    
     PROCEDURE repondreMessageMur(p_idMessage IN message.idMessage%TYPE, p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE , p_messageReponse IN message.message%TYPE);
 */
 END PackFasseBouc;
@@ -231,7 +231,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
           DBMS_OUTPUT.PUT_LINE('Mur de '||p_loginUtilisateur);
           FOR post IN (SELECT DISTINCT * FROM Message WHERE loginUtilisateurR = p_loginUtilisateur) 
           LOOP
-            DBMS_OUTPUT.PUT_LINE('Post de '||post.loginUtilisateurE|| ' posté le '|| post.datePublication ||' :'|| CHR(10) || post.message || CHR(10) || '--------------');
+            DBMS_OUTPUT.PUT_LINE('Post '||post.idMessage||' de '||post.loginUtilisateurE|| ' posté le '|| post.datePublication ||' :'|| CHR(10) || post.message || CHR(10) || '--------------');
           END LOOP;
         ELSE
           dbms_output.put_line('Vous devez etre connecte pour effectuer cette action');
@@ -258,13 +258,26 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         END IF;
     END ajouterMessageMur;
     
-    /*
-    PROCEDURE supprimerMessageMur(p_idMessage IN NUMBER) IS
+    PROCEDURE supprimerMessageMur(p_idMessage IN message.idMessage%TYPE) IS
+    idReceveur utilisateur.loginUtilisateur%TYPE;
     BEGIN
         -- Code pour supprimer un message du mur
-        DELETE FROM message WHERE idMessage = p_idMessage;
+        IF utilisateurConnecte IS NOT NULL THEN
+          SELECT loginUtilisateurR INTO idReceveur FROM Message WHERE idMessage = p_idMessage;
+          
+          IF idReceveur = utilisateurConnecte THEN
+            DELETE FROM Message WHERE idMessage = p_idMessage;
+            COMMIT;
+             DBMS_OUTPUT.PUT_LINE('Le message a bien ete supprime');
+          ELSE
+            DBMS_OUTPUT.PUT_LINE('Vous pouvez uniquement supprimer les messages de votre mur');
+          END IF;
+        ELSE
+          dbms_output.put_line('Vous devez etre connecte pour effectuer cette action');
+        END IF;
     END supprimerMessageMur;
-
+    
+    /*
     PROCEDURE repondreMessageMur(p_idMessage IN NUMBER, p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE, p_messageReponse IN VARCHAR2) IS
     BEGIN
         -- Code pour répondre à un message sur le mur
@@ -300,7 +313,9 @@ EXECUTE PackFasseBouc.compterAmi;
 
 EXECUTE PackFasseBouc.chercherMembre('all');
 
-EXECUTE PackFasseBouc.afficherMur('tauleigq');
+EXECUTE PackFasseBouc.afficherMur('alluel');
+
+EXECUTE PackFasseBouc.supprimerMessageMur(1003);
 
 EXECUTE PackFasseBouc.ajouterMessageMur('tauleigq','pikachu');
 
