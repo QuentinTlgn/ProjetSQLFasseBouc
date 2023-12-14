@@ -127,15 +127,17 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
     -- Vérifier si l'amitié existe déjà
     SELECT COUNT(*) INTO v_amitie_existe
     FROM Sympathiser
-    WHERE (loginUtilisateur1 = utilisateurConnecte AND loginUtilisateur2 = p_loginAmi)
-       OR (loginUtilisateur1 = p_loginAmi AND loginUtilisateur2 = utilisateurConnecte);
+    WHERE (loginUtilisateur1, loginUtilisateur2) IN ((utilisateurConnecte, p_loginAmi), (p_loginAmi, utilisateurConnecte));
+    
     IF v_amitie_existe > 0 THEN
       DBMS_OUTPUT.PUT_LINE('Vous êtes déjà ami avec cet utilisateur');
+    
     ELSE
     -- Code pour ajouter un ami
       IF utilisateurConnecte IS NOT NULL THEN
         INSERT INTO Sympathiser VALUES (utilisateurConnecte, p_loginAmi);
         DBMS_OUTPUT.PUT_LINE('Ami ajouté avec succès.');
+      
       ELSE
         DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
       END IF;
@@ -145,14 +147,13 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
     PROCEDURE supprimerAmi(p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         IF utilisateurConnecte IS NOT NULL THEN
+          -- Code pour supprimer un ami
           DELETE FROM sympathiser
           WHERE (loginUtilisateur1 = utilisateurConnecte AND loginUtilisateur2 = p_loginAmi)
                OR (loginUtilisateur1 = p_loginAmi AND loginUtilisateur2 = utilisateurConnecte);
         ELSE
           dbms_output.put_line('Vous devez etre connecte pour effectuer cette action');
         END IF;
-        -- Code pour supprimer un ami
-        
     END supprimerAmi;
     
 
@@ -185,25 +186,26 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         END IF;
         
     END deconnexion;
-/*
+    
+    PROCEDURE compterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
+    BEGIN
+        -- Code pour compter le nombre d'amis d'un utilisateur
+        -- (Ajoutez votre logique de comptage des amis ici)
+    END compterAmi;
+    
+    /*
+    PROCEDURE afficherAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
+    BEGIN
+        -- Code pour afficher la liste d'amis d'un utilisateur
+        -- (Ajoutez votre logique d'affichage des amis ici)
+    END afficherAmi;
+    
 
     PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour afficher le mur d'un utilisateur
         -- (Ajoutez votre logique d'affichage du mur ici)
     END afficherMur;
-    
-    PROCEDURE afficherAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
-    BEGIN
-        -- Code pour afficher la liste d'amis d'un utilisateur
-        -- (Ajoutez votre logique d'affichage des amis ici)
-    END afficherAmi;
-
-    PROCEDURE compterAmi(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
-    BEGIN
-        -- Code pour compter le nombre d'amis d'un utilisateur
-        -- (Ajoutez votre logique de comptage des amis ici)
-    END compterAmi;
     
     PROCEDURE chercherMembre(p_prefixeLoginMembre IN VARCHAR2) IS
     BEGIN
