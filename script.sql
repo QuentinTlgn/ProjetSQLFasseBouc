@@ -51,6 +51,20 @@ CREATE TABLE Sympathiser(
 */
 
 -- --------------------------
+-- Création des triggers
+-- --------------------------
+
+-- Procédure qui met à jour automatiquement l'identifiant du message avant un insert
+CREATE OR REPLACE TRIGGER t_idMessage BEFORE INSERT ON Message FOR EACH ROW
+DECLARE
+  idMessage INT; 
+BEGIN 
+  SELECT MAX(idMessage)+1 INTO :NEW.idMessage FROM Message;
+END;
+
+--------------------------------------------------------------------------------
+
+-- --------------------------
 -- Création des procédures stockées
 -- --------------------------
 
