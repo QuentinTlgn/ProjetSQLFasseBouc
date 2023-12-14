@@ -1,4 +1,4 @@
-SET SERVEROUTPUT ON;
+--SET SERVEROUTPUT ON;
 -- --------------------------
 -- Création des tables
 -- --------------------------
@@ -92,11 +92,9 @@ CREATE OR REPLACE PACKAGE PackFasseBouc AS
     
     PROCEDURE chercherMembre(p_prefixeLoginMembre IN utilisateur.loginUtilisateur%TYPE);
     
-/*
     PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE);
     
-    PROCEDURE chercherMembre(p_prefixeLoginMembre IN VARCHAR);
-    
+/*    
     PROCEDURE ajouterMessageMur(p_loginUtilisateurE IN utilisateur.loginUtilisateur%TYPE, p_message IN message.message%TYPE);
 
     PROCEDURE supprimerMessageMur(p_idMessage IN message.idMessage%TYPE);
@@ -226,14 +224,21 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         END IF;
     END chercherMembre;
     
-    /*
     PROCEDURE afficherMur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour afficher le mur d'un utilisateur
-        -- (Ajoutez votre logique d'affichage du mur ici)
+        IF utilisateurConnecte IS NOT NULL THEN
+          DBMS_OUTPUT.PUT_LINE('Mur de '||p_loginUtilisateur);
+          FOR post IN (SELECT DISTINCT * FROM Message WHERE loginUtilisateurR = p_loginUtilisateur) 
+          LOOP
+            DBMS_OUTPUT.PUT_LINE('Post de '||post.loginUtilisateurE|| ' posté le '|| post.datePublication ||' :'|| CHR(10) || post.message || CHR(10) || '--------------');
+          END LOOP;
+        ELSE
+          dbms_output.put_line('Vous devez etre connecte pour effectuer cette action');
+        END IF;
     END afficherMur;
     
-    
+    /*
 
     PROCEDURE ajouterMessageMur(p_loginUtilisateurE IN utilisateur.loginUtilisateur%TYPE, p_loginUtilisateurR IN utilisateur.loginUtilisateur%TYPE, p_message IN message.message%TYPE) IS
     BEGIN
@@ -281,6 +286,8 @@ EXECUTE PackFasseBouc.deconnexion;
 EXECUTE PackFasseBouc.compterAmi;
 
 EXECUTE PackFasseBouc.chercherMembre('all');
+
+EXECUTE PackFasseBouc.afficherMur('alluel');
 
 /*SELECT * FROM USER_OBJECTS WHERE OBJECT_NAME = 'PACKFASSEBOUC' AND OBJECT_TYPE IN ('PACKAGE', 'PACKAGE BODY');
 
