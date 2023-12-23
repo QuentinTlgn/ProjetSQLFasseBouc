@@ -1,4 +1,9 @@
-SET SERVEROUTPUT ON;
+-- Nom du fichier : fassebouc.sql
+-- Auteur : ALLUE Luc et TAULEIGNE Quentin
+-- Date de création : 7/12/2023
+-- Version : 1.0
+-- Description : Ce script SQL crée un base de donné style Facebook.
+
 -- --------------------------
 -- Création des tables
 -- --------------------------
@@ -6,9 +11,9 @@ SET SERVEROUTPUT ON;
 --DROP TABLE message;
 --DROP TABLE reponsemessage;
 --DROP TABLE utilisateur;
+SET SERVEROUTPUT ON;
 
 -- Création de la table Utilisateur
-/*
 CREATE TABLE Utilisateur(
    loginUtilisateur VARCHAR(50),
    nom VARCHAR(50),
@@ -48,7 +53,28 @@ CREATE TABLE Sympathiser(
    FOREIGN KEY(loginUtilisateur1) REFERENCES Utilisateur(loginUtilisateur),
    FOREIGN KEY(loginUtilisateur2) REFERENCES Utilisateur(loginUtilisateur)
 );
-*/
+
+-- --------------------------
+-- Création des insert dans les table 
+-- --------------------------
+-- Ajouter des utilisateurs
+INSERT INTO Utilisateur VALUES ('alice123', 'Alice', 'Dupont', TO_DATE('1990-05-15', 'YYYY-MM-DD'));
+INSERT INTO Utilisateur VALUES ('bob456', 'Bob', 'Martin', TO_DATE('1985-12-10', 'YYYY-MM-DD'));
+INSERT INTO Utilisateur VALUES ('carol789', 'Carol', 'Lefevre', TO_DATE('1993-08-22', 'YYYY-MM-DD'));
+
+-- Ajouter des messages
+INSERT INTO Message VALUES (1, 'Salut à tous ! Comment ça va ?', SYSDATE, 'alice123', 'bob456');
+INSERT INTO Message VALUES (2, 'Une belle journée ensoleillée !', SYSDATE, 'bob456', 'alice123');
+INSERT INTO Message VALUES (3, 'Bonjour tout le monde !', SYSDATE, 'carol789', 'alice123');
+
+-- Ajouter des réponses à des messages
+INSERT INTO ReponseMessage VALUES (1, 'bob456', 'Ça va bien, merci !', SYSDATE);
+INSERT INTO ReponseMessage VALUES (1, 'carol789', 'Salut Alice !', SYSDATE);
+INSERT INTO ReponseMessage VALUES (2, 'alice123', 'Oui, super journée !', SYSDATE);
+
+-- Ajouter des relations d'amitié
+INSERT INTO Sympathiser VALUES ('alice123', 'bob456');
+INSERT INTO Sympathiser VALUES ('alice123', 'carol789');
 
 -- --------------------------
 -- Création des triggers
@@ -59,16 +85,19 @@ CREATE OR REPLACE TRIGGER t_idMessage BEFORE INSERT ON Message FOR EACH ROW
 DECLARE
   idMessage INT; 
 BEGIN 
-  SELECT NVL(MAX(idMessage),0)+1 INTO :NEW.idMessage FROM Message;
+  -- Sélectionne le maximum de l'identifiant de message existant et ajoute 1
+  SELECT NVL(MAX(idMessage), 0) + 1 INTO :NEW.idMessage FROM Message;
 END;
+-- Ce déclencheur est conçu pour générer automatiquement un identifiant unique pour chaque nouveau message inséré.
 
+-- Déclencheur qui notifie la création d'un nouveau message sur le mur
 CREATE OR REPLACE TRIGGER t_notifCreationMessageMur AFTER INSERT ON Message FOR EACH ROW
 DECLARE
 BEGIN 
-  dbms_output.put_line('Nouveau message de '||:NEW.loginUtilisateurE||' sur le mur de '||:NEW.loginUtilisateurR);
+  -- Affiche un message de notification lorsqu'un nouveau message est inséré sur le mur
+  dbms_output.put_line('Nouveau message de ' || :NEW.loginUtilisateurE || ' sur le mur de ' || :NEW.loginUtilisateurR);
 END;
-
---------------------------------------------------------------------------------
+-- Ce déclencheur génère une notification à chaque fois qu'un nouveau message est inséré dans la table Message.
 
 -- --------------------------
 -- Création des procédures stockées
@@ -157,13 +186,11 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
 
         IF v_amitie_existe > 0 THEN
             DBMS_OUTPUT.PUT_LINE('Vous êtes déjà ami avec cet utilisateur');
-            UNLOCK TABLE Sympathiser;
         ELSE
             -- Code pour ajouter un ami
             IF utilisateurConnecte IS NOT NULL THEN
                 INSERT INTO Sympathiser VALUES (utilisateurConnecte, p_loginAmi);
                 COMMIT;
-                UNLOCK TABLE Sympathiser;
                 DBMS_OUTPUT.PUT_LINE('Ami ajouté avec succès.');
             ELSE
                 DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
@@ -230,13 +257,20 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
     
     -- Procédure pour afficher la liste d'amis d'un utilisateur
     PROCEDURE afficherAmi IS
+    v_amis_trouves NUMBER := 0;  -- Variable pour suivre le nombre d'amis trouvés
     BEGIN
         -- Code pour afficher la liste d'amis d'un utilisateur
         IF utilisateurConnecte IS NOT NULL THEN
-            FOR ami_rec IN (SELECT DISTINCT CASE WHEN loginUtilisateur1 = utilisateurConnecte THEN loginUtilisateur2 ELSE loginUtilisateur1 END AS ami FROM sympathiser WHERE utilisateurConnecte IN (loginUtilisateur1, loginUtilisateur2)) 
+            FOR ami_rec IN (SELECT DISTINCT CASE WHEN loginUtilisateur1 = utilisateurConnecte THEN loginUtilisateur2 ELSE loginUtilisateur1 
+            END AS ami FROM sympathiser WHERE utilisateurConnecte IN (loginUtilisateur1, loginUtilisateur2)) 
             LOOP
                 DBMS_OUTPUT.PUT_LINE('Ami : ' || ami_rec.ami);
+                v_amis_trouves := 1;  -- Un ami trouvé
             END LOOP;
+            -- Afficher le message si aucun ami n'a été trouvé
+        IF v_amis_trouves = 0 THEN
+            DBMS_OUTPUT.PUT_LINE('Pas encore d''ami.');
+        END IF;
         ELSE
             DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour afficher la liste d''amis.');
         END IF;
@@ -347,10 +381,8 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
             IF (v_amitie_existe > 0 OR utilisateurConnecte =  idReceveur) AND idMessage IS NOT NULL THEN
                 INSERT INTO ReponseMessage VALUES (p_idMessage, utilisateurConnecte, p_messageReponse, SYSDATE);
                 COMMIT;
-                UNLOCK TABLE ReponseMessage;
             ELSE
                 dbms_output.put_line('Vous devez être ami avec cette personne pour pouvoir effectuer cette action');
-                UNLOCK TABLE ReponseMessage;
             END IF;
         ELSE
             dbms_output.put_line('Vous devez être connecté pour effectuer cette action');
@@ -384,13 +416,13 @@ EXECUTE PackFasseBouc.deconnexion;
 
 EXECUTE PackFasseBouc.compterAmi;
 
-EXECUTE PackFasseBouc.chercherMembre('all');
+EXECUTE PackFasseBouc.chercherMembre('a');
 
-EXECUTE PackFasseBouc.afficherMur('alluel');
+EXECUTE PackFasseBouc.afficherMur('tauleigq');
 
-EXECUTE PackFasseBouc.supprimerMessageMur(2);
+EXECUTE PackFasseBouc.supprimerMessageMur(1);
 
 EXECUTE PackFasseBouc.ajouterMessageMur('tauleigq','onix');
 
-EXECUTE PackFasseBouc.repondreMessageMur(4, 'bienvue');
+EXECUTE PackFasseBouc.repondreMessageMur(3, 'bienvue');
 SELECT * FROM ReponseMessage;
