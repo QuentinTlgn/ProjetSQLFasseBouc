@@ -7,8 +7,9 @@
 -- --------------------------
 -- Création des tables
 -- --------------------------
--- Commandes pour supprimer les tables (à utiliser avec précaution, car elles suppriment définitivement les données)
 
+-- Commandes pour supprimer les tables (à utiliser avec précaution, car elles suppriment définitivement les données)
+-- Faire que si besoin sinon faire la création directement
 -- Supprimer la table "sympathiser"
 DROP TABLE sympathiser;
 
@@ -20,9 +21,6 @@ DROP TABLE reponsemessage;
 
 -- Supprimer la table "utilisateur"
 DROP TABLE utilisateur;
-
--- Commande pour activer la sortie du serveur
-SET SERVEROUTPUT ON;
 
 -- Création de la table Utilisateur
 CREATE TABLE Utilisateur(
@@ -413,9 +411,20 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
 -- --------------------------
 -- Execution des procédures
 -- --------------------------
+-- Commande pour activer la sortie du serveur
+SET SERVEROUTPUT ON;
 
 --Création de l'utilisateur principal
 EXECUTE PackFasseBouc.ajouterUtilisateur('moulyx', 'Mouly', 'Xavier', '01/01/2000');
+
+-- Ajoute deux utilisateurs avec des noms créatifs, parce que la vie est trop courte pour des noms ennuyeux
+
+EXECUTE PackFasseBouc.ajouterUtilisateur('alluel', 'ALLUE', 'Luc', '23/04/2000');
+-- Alluel, parce que tout est bien qui finit bien, sauf si vous êtes un SQL sans fin.
+
+EXECUTE PackFasseBouc.ajouterUtilisateur('tauleigq', 'TAULEIGNE', 'Quentin', '28/03/2002');
+-- Tauleigne, parce qu'il vaut mieux être dans la base de données que dans la taule.
+
 
 --Création d'un utilisateur d'exemple
 EXECUTE PackFasseBouc.ajouterUtilisateur('marleyb', 'Marley', 'Bob', '06/01/1945');
@@ -453,14 +462,14 @@ EXECUTE PackFasseBouc.afficherMur('tauleigq');
 EXECUTE PackFasseBouc.afficherMur('moulyx');
 
 -- On supprime le message de son mur
-EXECUTE PackFasseBouc.supprimerMessageMur(2); --Attention, il sera peut-être nécessaire de modifier l'identifiant du message à supprimer
+EXECUTE PackFasseBouc.supprimerMessageMur(5); --Attention, il sera peut-être nécessaire de modifier l'identifiant du message à supprimer
 
 -- On se déconnecte
 EXECUTE PackFasseBouc.deconnexion;
 
 --On se reconnecte avec un autre utilisateur pour aller répondre au message
 EXECUTE PackFasseBouc.connexion('tauleigq');
-EXECUTE PackFasseBouc.repondreMessageMur(3, 'Merci !');
+EXECUTE PackFasseBouc.repondreMessageMur(6, 'Merci ! petit 20/20 non?');
 
 --On visualise la réponse
 EXECUTE PackFasseBouc.afficherMur('tauleigq');
