@@ -7,10 +7,21 @@
 -- --------------------------
 -- Création des tables
 -- --------------------------
---DROP TABLE sympathiser;
---DROP TABLE message;
---DROP TABLE reponsemessage;
---DROP TABLE utilisateur;
+-- Commandes pour supprimer les tables (à utiliser avec précaution, car elles suppriment définitivement les données)
+
+-- Supprimer la table "sympathiser"
+DROP TABLE sympathiser;
+
+-- Supprimer la table "message"
+DROP TABLE message;
+
+-- Supprimer la table "reponsemessage"
+DROP TABLE reponsemessage;
+
+-- Supprimer la table "utilisateur"
+DROP TABLE utilisateur;
+
+-- Commande pour activer la sortie du serveur
 SET SERVEROUTPUT ON;
 
 -- Création de la table Utilisateur
@@ -174,16 +185,16 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         COMMIT;
     END supprimerUtilisateur;
     
-    -- Procédure pour ajouter un ami
+   -- Procédure pour ajouter un ami
     PROCEDURE ajouterAmi(p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
-    v_amitie_existe NUMBER := 0;
+        v_amitie_existe NUMBER := 0;
     BEGIN
         -- Vérifier si l'amitié existe déjà
         EXECUTE IMMEDIATE 'LOCK TABLE Sympathiser IN EXCLUSIVE MODE NOWAIT';
         SELECT COUNT(*) INTO v_amitie_existe
         FROM Sympathiser
         WHERE (loginUtilisateur1, loginUtilisateur2) IN ((utilisateurConnecte, p_loginAmi), (p_loginAmi, utilisateurConnecte));
-
+    
         IF v_amitie_existe > 0 THEN
             DBMS_OUTPUT.PUT_LINE('Vous êtes déjà ami avec cet utilisateur');
         ELSE
@@ -197,7 +208,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
             END IF;
         END IF;
     END ajouterAmi;
-
+    
     -- Procédure pour supprimer un ami
     PROCEDURE supprimerAmi(p_loginAmi IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
@@ -206,10 +217,10 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
             DELETE FROM sympathiser
             WHERE (loginUtilisateur1, loginUtilisateur2) IN ((utilisateurConnecte, p_loginAmi), (p_loginAmi, utilisateurConnecte));
         ELSE
-            DBMS_OUTPUT.PUT_LINE('Vous devez etre connecte pour effectuer cette action');
+            DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
         END IF;
     END supprimerAmi;
-
+    
     -- Procédure pour connecter un utilisateur
     PROCEDURE connexion(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
@@ -218,9 +229,9 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
             SELECT loginUtilisateur INTO utilisateurConnecte
             FROM utilisateur
             WHERE loginUtilisateur = p_loginUtilisateur;
-            dbms_output.put_line('Bienvenue ' || utilisateurConnecte);
+            DBMS_OUTPUT.PUT_LINE('Bienvenue ' || utilisateurConnecte);
         ELSE
-            dbms_output.put_line('Utilisateur ' || utilisateurConnecte || ' deja connecte. Veuillez le deconnecter avant de vous reconnecter');
+            DBMS_OUTPUT.PUT_LINE('Utilisateur ' || utilisateurConnecte || ' déjà connecté. Veuillez le déconnecter avant de vous reconnecter');
         END IF;
     END connexion;
     
@@ -236,9 +247,9 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         -- Code pour déconnecter l'utilisateur courant
         IF utilisateurConnecte IS NOT NULL THEN
             utilisateurConnecte := NULL;
-            dbms_output.put_line('Vous nous quittez déjà ? :(');
+            DBMS_OUTPUT.PUT_LINE('Vous nous quittez déjà ? :(');
         ELSE
-            dbms_output.put_line('Aucun utilisateur connecté');
+            DBMS_OUTPUT.PUT_LINE('Aucun utilisateur connecté');
         END IF;
     END deconnexion;
     
@@ -249,34 +260,41 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         -- Code pour compter le nombre d'amis d'un utilisateur
         IF utilisateurConnecte IS NOT NULL THEN
             SELECT COUNT(*) INTO numAmi FROM Sympathiser WHERE loginUtilisateur1 = utilisateurConnecte OR loginUtilisateur2 = utilisateurConnecte;
-            dbms_output.put_line('Vous avez ' || numAmi || ' ami(s)');
+            DBMS_OUTPUT.PUT_LINE('Vous avez ' || numAmi || ' ami(s)');
         ELSE
-            dbms_output.put_line('Vous devez être connecté pour effectuer cette action');
+            DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
         END IF;
     END compterAmi;
     
     -- Procédure pour afficher la liste d'amis d'un utilisateur
     PROCEDURE afficherAmi IS
-    v_amis_trouves NUMBER := 0;  -- Variable pour suivre le nombre d'amis trouvés
+        v_amis_trouves NUMBER := 0;  -- Variable pour suivre le nombre d'amis trouvés
     BEGIN
         -- Code pour afficher la liste d'amis d'un utilisateur
         IF utilisateurConnecte IS NOT NULL THEN
-            FOR ami_rec IN (SELECT DISTINCT CASE WHEN loginUtilisateur1 = utilisateurConnecte THEN loginUtilisateur2 ELSE loginUtilisateur1 
-            END AS ami FROM sympathiser WHERE utilisateurConnecte IN (loginUtilisateur1, loginUtilisateur2)) 
+            -- Utilisation de CURSOR FOR LOOP pour gérer le cas où il n'y a pas d'amis
+            FOR ami_rec IN (SELECT DISTINCT
+                                CASE 
+                                    WHEN loginUtilisateur1 = utilisateurConnecte THEN loginUtilisateur2
+                                    ELSE loginUtilisateur1
+                                END AS ami
+                            FROM sympathiser
+                            WHERE utilisateurConnecte IN (loginUtilisateur1, loginUtilisateur2)) 
             LOOP
                 DBMS_OUTPUT.PUT_LINE('Ami : ' || ami_rec.ami);
                 v_amis_trouves := 1;  -- Un ami trouvé
             END LOOP;
+    
             -- Afficher le message si aucun ami n'a été trouvé
-        IF v_amis_trouves = 0 THEN
-            DBMS_OUTPUT.PUT_LINE('Pas encore d''ami.');
-        END IF;
+            IF v_amis_trouves = 0 THEN
+                DBMS_OUTPUT.PUT_LINE('Pas encore d''ami.');
+            END IF;
         ELSE
             DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour afficher la liste d''amis.');
         END IF;
     END afficherAmi;
-    
-        -- PROCEDURE chercherMembre : Cherche un membre par préfixe de login
+
+    -- PROCEDURE chercherMembre : Cherche des membres par préfixe de login
     PROCEDURE chercherMembre(p_prefixeLoginMembre IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Vérifie si un utilisateur est connecté
@@ -287,7 +305,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
                 DBMS_OUTPUT.PUT_LINE('Utilisateur : '||v_Utilisateur.loginutilisateur);
             END LOOP;
         ELSE
-            dbms_output.put_line('Vous devez être connecté pour effectuer cette action');
+            DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
         END IF;
     END chercherMembre;
     
@@ -310,11 +328,11 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
                 END IF;
             END LOOP;
         ELSE
-            dbms_output.put_line('Vous devez être connecté pour effectuer cette action');
+            DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
         END IF;
     END afficherMur;
     
-        -- PROCEDURE ajouterMessageMur : Ajoute un message au mur d'un utilisateur
+    -- PROCEDURE ajouterMessageMur : Ajoute un message au mur d'un utilisateur
     PROCEDURE ajouterMessageMur(p_loginUtilisateurR IN utilisateur.loginUtilisateur%TYPE, p_message IN message.message%TYPE) IS
         v_amitie_existe NUMBER := 0;
     BEGIN
@@ -330,13 +348,13 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
                 INSERT INTO message VALUES (1, p_message, SYSDATE, utilisateurConnecte, p_loginUtilisateurR);
                 COMMIT;
             ELSE
-                dbms_output.put_line('Vous devez être ami avec cette personne pour pouvoir effectuer cette action');
+                DBMS_OUTPUT.PUT_LINE('Vous devez être ami avec cette personne pour pouvoir effectuer cette action');
             END IF;
         ELSE
             DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
         END IF;
     END ajouterMessageMur;
-    
+
     -- PROCEDURE supprimerMessageMur : Supprime un message du mur d'un utilisateur
     PROCEDURE supprimerMessageMur(p_idMessage IN message.idMessage%TYPE) IS
         idReceveur utilisateur.loginUtilisateur%TYPE;
@@ -356,7 +374,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
                 DBMS_OUTPUT.PUT_LINE('Vous pouvez uniquement supprimer les messages de votre mur');
             END IF;
         ELSE
-            dbms_output.put_line('Vous devez être connecté pour effectuer cette action');
+            DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
         END IF;
     END supprimerMessageMur;
     
@@ -382,13 +400,14 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
                 INSERT INTO ReponseMessage VALUES (p_idMessage, utilisateurConnecte, p_messageReponse, SYSDATE);
                 COMMIT;
             ELSE
-                dbms_output.put_line('Vous devez être ami avec cette personne pour pouvoir effectuer cette action');
+                DBMS_OUTPUT.PUT_LINE('Vous devez être ami avec cette personne pour pouvoir effectuer cette action');
             END IF;
         ELSE
-            dbms_output.put_line('Vous devez être connecté pour effectuer cette action');
+            DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
         END IF;
     END repondreMessageMur;
     
+    -- Fin création du bady packfassebouc
     END PackFasseBouc;
 
 -- --------------------------
