@@ -133,14 +133,18 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
     IS
     BEGIN
         -- Code pour ajouter un utilisateur
+        EXECUTE IMMEDIATE 'LOCK TABLE Utilisateur IN EXCLUSIVE MODE NOWAIT';
         INSERT INTO utilisateur VALUES(p_loginUtilisateur, p_nom, p_prenom, p_anniversaire);
+        COMMIT;
     END ajouterUtilisateur;
 
     -- Procédure pour supprimer un utilisateur
     PROCEDURE supprimerUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour supprimer un utilisateur
+        EXECUTE IMMEDIATE 'LOCK TABLE Utilisateur IN EXCLUSIVE MODE NOWAIT';
         DELETE FROM utilisateur WHERE loginUtilisateur = p_loginUtilisateur;
+        COMMIT;
     END supprimerUtilisateur;
     
     -- Procédure pour ajouter un ami
@@ -148,6 +152,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
     v_amitie_existe NUMBER := 0;
     BEGIN
         -- Vérifier si l'amitié existe déjà
+        EXECUTE IMMEDIATE 'LOCK TABLE Sympathiser IN EXCLUSIVE MODE NOWAIT';
         SELECT COUNT(*) INTO v_amitie_existe
         FROM Sympathiser
         WHERE (loginUtilisateur1, loginUtilisateur2) IN ((utilisateurConnecte, p_loginAmi), (p_loginAmi, utilisateurConnecte));
