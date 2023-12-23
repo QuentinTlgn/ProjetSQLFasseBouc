@@ -46,7 +46,4 @@ Lorsqu'un message est ajouté sur le mur, vous devez générer un événement pa
 ### Gestion des transactions
 Vous devez gérer les différentes transactions entre utilisateurs sur la base de données.
 
-## Plan de Test
-TODO: Ajoutez ici le plan de test. Et n'oubliez pas de tester avec un peu d'amour.
-
 ### Signé par ALLUE Luc, TAULEIGNE Quentin
