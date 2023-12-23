@@ -47,3 +47,4 @@ Lorsqu'un message est ajouté sur le mur, vous devez générer un événement pa
 Vous devez gérer les différentes transactions entre utilisateurs sur la base de données.
 
 ### Signé par ALLUE Luc, TAULEIGNE Quentin
+### Que le code soit avec vous! 😄✨
