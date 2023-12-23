@@ -414,34 +414,53 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
 -- Execution des procédures
 -- --------------------------
 
-EXECUTE PackFasseBouc.ajouterUtilisateur('alluel', 'allue', 'luc', '23/04/2000');
-EXECUTE PackFasseBouc.ajouterUtilisateur('tauleigq', 'tauleigne', 'quentin', '28/03/2002');
-EXECUTE PackFasseBouc.ajouterUtilisateur('toto', 'to', 'to', '28/03/2002');
+--Création de l'utilisateur principal
+EXECUTE PackFasseBouc.ajouterUtilisateur('moulyx', 'Mouly', 'Xavier', '01/01/2000');
 
-SELECT * FROM utilisateur;
+--Création d'un utilisateur d'exemple
+EXECUTE PackFasseBouc.ajouterUtilisateur('marleyb', 'Marley', 'Bob', '06/01/1945');
 
-EXECUTE PackFasseBouc.supprimerUtilisateur('toto');
+--On supprime cet utilisateur
+EXECUTE PackFasseBouc.supprimerUtilisateur('marleyb');
 
-EXECUTE PackFasseBouc.ajouterAmi('tauleigq');
-SELECT * FROM sympathiser;
+--Connexion au compte
+EXECUTE PackFasseBouc.connexion('moulyx');
 
-EXECUTE PackFasseBouc.supprimerAmi('tauleigq');
-
-EXECUTE PackFasseBouc.connexion('alluel');
-EXECUTE PackFasseBouc.afficherAmi;
+--Affiche l'utiliateur connecté
 EXECUTE PackFasseBouc.afficherConnecte;
+
+--Ajout d'amis
+EXECUTE PackFasseBouc.ajouterAmi('tauleigq');
+EXECUTE PackFasseBouc.ajouterAmi('alluel');
+
+--On regarde nos amis
+EXECUTE PackFasseBouc.compterAmi;
+EXECUTE PackFasseBouc.afficherAmi;
+
+--Suppression d'un ami
+EXECUTE PackFasseBouc.supprimerAmi('alluel');
+
+--On cherche un utilisateur
+EXECUTE PackFasseBouc.chercherMembre('al');
+
+--Ajoute un message sur des murs
+EXECUTE PackFasseBouc.ajouterMessageMur('moulyx','Bienvenue sur mon mur !');
+EXECUTE PackFasseBouc.ajouterMessageMur('moulyx','Ce message est destiné à etre supprimé!');
+EXECUTE PackFasseBouc.ajouterMessageMur('tauleigq','Bien joué pour votre projet ! :)');
+
+--On affiche le mur d'utilisateurs
+EXECUTE PackFasseBouc.afficherMur('tauleigq');
+EXECUTE PackFasseBouc.afficherMur('moulyx');
+
+-- On supprime le message de son mur
+EXECUTE PackFasseBouc.supprimerMessageMur(2); --Attention, il sera peut-être nécessaire de modifier l'identifiant du message à supprimer
+
+-- On se déconnecte
 EXECUTE PackFasseBouc.deconnexion;
 
+--On se reconnecte avec un autre utilisateur pour aller répondre au message
+EXECUTE PackFasseBouc.connexion('tauleigq');
+EXECUTE PackFasseBouc.repondreMessageMur(3, 'Merci !');
 
-EXECUTE PackFasseBouc.compterAmi;
-
-EXECUTE PackFasseBouc.chercherMembre('a');
-
+--On visualise la réponse
 EXECUTE PackFasseBouc.afficherMur('tauleigq');
-
-EXECUTE PackFasseBouc.supprimerMessageMur(1);
-
-EXECUTE PackFasseBouc.ajouterMessageMur('tauleigq','onix');
-
-EXECUTE PackFasseBouc.repondreMessageMur(3, 'bienvue');
-SELECT * FROM ReponseMessage;
