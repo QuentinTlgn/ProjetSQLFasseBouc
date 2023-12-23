@@ -133,7 +133,6 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
     IS
     BEGIN
         -- Code pour ajouter un utilisateur
-        EXECUTE IMMEDIATE 'LOCK TABLE Utilisateur IN EXCLUSIVE MODE NOWAIT';
         INSERT INTO utilisateur VALUES(p_loginUtilisateur, p_nom, p_prenom, p_anniversaire);
         COMMIT;
     END ajouterUtilisateur;
@@ -142,7 +141,6 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
     PROCEDURE supprimerUtilisateur(p_loginUtilisateur IN utilisateur.loginUtilisateur%TYPE) IS
     BEGIN
         -- Code pour supprimer un utilisateur
-        EXECUTE IMMEDIATE 'LOCK TABLE Utilisateur IN EXCLUSIVE MODE NOWAIT';
         DELETE FROM utilisateur WHERE loginUtilisateur = p_loginUtilisateur;
         COMMIT;
     END supprimerUtilisateur;
@@ -156,14 +154,16 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         SELECT COUNT(*) INTO v_amitie_existe
         FROM Sympathiser
         WHERE (loginUtilisateur1, loginUtilisateur2) IN ((utilisateurConnecte, p_loginAmi), (p_loginAmi, utilisateurConnecte));
-        
+
         IF v_amitie_existe > 0 THEN
             DBMS_OUTPUT.PUT_LINE('Vous êtes déjà ami avec cet utilisateur');
+            UNLOCK TABLE Sympathiser;
         ELSE
             -- Code pour ajouter un ami
             IF utilisateurConnecte IS NOT NULL THEN
                 INSERT INTO Sympathiser VALUES (utilisateurConnecte, p_loginAmi);
                 COMMIT;
+                UNLOCK TABLE Sympathiser;
                 DBMS_OUTPUT.PUT_LINE('Ami ajouté avec succès.');
             ELSE
                 DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
@@ -335,6 +335,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         -- Vérifie si un utilisateur est connecté
         IF utilisateurConnecte IS NOT NULL THEN
             -- Récupère l'ID du message et le login du receveur
+            EXECUTE IMMEDIATE 'LOCK TABLE ReponseMessage IN EXCLUSIVE MODE NOWAIT';
             SELECT idMessage, loginUtilisateurR INTO idMessage, idReceveur FROM Message WHERE idMessage = p_idMessage;
             
             -- Vérifie si l'amitié existe
@@ -346,8 +347,10 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
             IF (v_amitie_existe > 0 OR utilisateurConnecte =  idReceveur) AND idMessage IS NOT NULL THEN
                 INSERT INTO ReponseMessage VALUES (p_idMessage, utilisateurConnecte, p_messageReponse, SYSDATE);
                 COMMIT;
+                UNLOCK TABLE ReponseMessage;
             ELSE
                 dbms_output.put_line('Vous devez être ami avec cette personne pour pouvoir effectuer cette action');
+                UNLOCK TABLE ReponseMessage;
             END IF;
         ELSE
             dbms_output.put_line('Vous devez être connecté pour effectuer cette action');
