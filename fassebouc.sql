@@ -64,7 +64,7 @@ CREATE TABLE Sympathiser(
 );
 
 -- --------------------------
--- Création des insert dans les table 
+-- Insertion des données dans les tables 
 -- --------------------------
 -- Ajouter des utilisateurs
 INSERT INTO Utilisateur VALUES ('alice123', 'Alice', 'Dupont', TO_DATE('1990-05-15', 'YYYY-MM-DD'));
@@ -185,7 +185,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         -- Code pour supprimer un utilisateur
         DELETE FROM utilisateur WHERE loginUtilisateur = p_loginUtilisateur;
         COMMIT;
-        DBMS_OUTPUT.PUT_LINE('Utilisateur supprimer avec succès');
+        DBMS_OUTPUT.PUT_LINE('Utilisateur supprimé avec succès');
     END supprimerUtilisateur;
     
    -- Procédure pour ajouter un ami
@@ -200,6 +200,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
     
         IF v_amitie_existe > 0 THEN
             DBMS_OUTPUT.PUT_LINE('Vous êtes déjà ami avec cet utilisateur');
+            COMMIT;
         ELSE
             -- Code pour ajouter un ami
             IF utilisateurConnecte IS NOT NULL THEN
@@ -219,7 +220,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
             -- Code pour supprimer un ami
             DELETE FROM sympathiser
             WHERE (loginUtilisateur1, loginUtilisateur2) IN ((utilisateurConnecte, p_loginAmi), (p_loginAmi, utilisateurConnecte));
-            DBMS_OUTPUT.PUT_LINE('Ami supprimer avec succès');
+            DBMS_OUTPUT.PUT_LINE('Ami supprimé avec succès');
         ELSE
             DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
         END IF;
@@ -242,7 +243,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
     -- Procédure pour afficher l'utilisateur connecté
     PROCEDURE afficherConnecte IS
     BEGIN
-        dbms_output.put_line(utilisateurConnecte);
+        dbms_output.put_line('Utilisateur connecté : ' || utilisateurConnecte);
     END afficherConnecte;
     
     -- Procédure pour déconnecter l'utilisateur courant
@@ -294,7 +295,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
                 DBMS_OUTPUT.PUT_LINE('Pas encore d''ami.');
             END IF;
         ELSE
-            DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour afficher la liste d''amis.');
+            DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
         END IF;
     END afficherAmi;
 
@@ -405,6 +406,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
                 COMMIT;
             ELSE
                 DBMS_OUTPUT.PUT_LINE('Vous devez être ami avec cette personne pour pouvoir effectuer cette action');
+                COMMIT;
             END IF;
         ELSE
             DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
@@ -423,13 +425,9 @@ SET SERVEROUTPUT ON;
 --Création de l'utilisateur principal
 EXECUTE PackFasseBouc.ajouterUtilisateur('moulyx', 'Mouly', 'Xavier', '01/01/2000');
 
--- Ajoute deux utilisateurs avec des noms créatifs, parce que la vie est trop courte pour des noms ennuyeux
-
+-- Ajoute deux utilisateurs
 EXECUTE PackFasseBouc.ajouterUtilisateur('alluel', 'ALLUE', 'Luc', '23/04/2000');
--- Alluel, parce que tout est bien qui finit bien, sauf si vous êtes un SQL sans fin.
-
 EXECUTE PackFasseBouc.ajouterUtilisateur('tauleigq', 'TAULEIGNE', 'Quentin', '28/03/2002');
--- Tauleigne, parce qu'il vaut mieux être dans la base de données que dans la taule.
 
 
 --Création d'un utilisateur d'exemple
