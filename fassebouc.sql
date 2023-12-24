@@ -89,13 +89,16 @@ INSERT INTO Sympathiser VALUES ('alice123', 'carol789');
 -- Création des triggers
 -- --------------------------
 
--- Procédure qui met à jour automatiquement l'identifiant du message avant un insert
-CREATE OR REPLACE TRIGGER t_idMessage BEFORE INSERT ON Message FOR EACH ROW
+-- Ce déclencheur met à jour automatiquement l'identifiant du message avant un insert
+CREATE OR REPLACE TRIGGER AjoutMessage BEFORE INSERT ON Message
+FOR EACH ROW
 DECLARE
-  idMessage INT; 
-BEGIN 
-  -- Sélectionne le maximum de l'identifiant de message existant et ajoute 1
-  SELECT NVL(MAX(idMessage), 0) + 1 INTO :NEW.idMessage FROM Message;
+   max_id NUMBER;
+BEGIN
+   -- Obtenir le maximum de l'identifiant de message
+   SELECT NVL(MAX(idMessage), 0) + 1 INTO max_id FROM Message;
+   -- Mettre à jour la valeur idMessage dans :NEW
+   :NEW.idMessage := max_id;
 END;
 -- Ce déclencheur est conçu pour générer automatiquement un identifiant unique pour chaque nouveau message inséré.
 
@@ -173,6 +176,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         -- Code pour ajouter un utilisateur
         INSERT INTO utilisateur VALUES(p_loginUtilisateur, p_nom, p_prenom, p_anniversaire);
         COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Utilisateur ajouté avec succès');
     END ajouterUtilisateur;
 
     -- Procédure pour supprimer un utilisateur
@@ -181,6 +185,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
         -- Code pour supprimer un utilisateur
         DELETE FROM utilisateur WHERE loginUtilisateur = p_loginUtilisateur;
         COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Utilisateur supprimer avec succès');
     END supprimerUtilisateur;
     
    -- Procédure pour ajouter un ami
@@ -214,6 +219,7 @@ CREATE OR REPLACE PACKAGE BODY PackFasseBouc AS
             -- Code pour supprimer un ami
             DELETE FROM sympathiser
             WHERE (loginUtilisateur1, loginUtilisateur2) IN ((utilisateurConnecte, p_loginAmi), (p_loginAmi, utilisateurConnecte));
+            DBMS_OUTPUT.PUT_LINE('Ami supprimer avec succès');
         ELSE
             DBMS_OUTPUT.PUT_LINE('Vous devez être connecté pour effectuer cette action');
         END IF;
